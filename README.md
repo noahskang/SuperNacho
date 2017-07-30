@@ -20,7 +20,8 @@ Project will also include:
 ## Wireframes
 ![landing page](http://res.cloudinary.com/noah-s-kang/image/upload/v1501450541/Screen_Shot_2017-07-30_at_2.33.32_PM_ugnkdn.png)
 
-![game design inspiration](http://res.cloudinary.com/noah-s-kang/image/upload/v1501451495/Screen_Shot_2017-07-30_at_2.51.11_PM_uiqsia.png)
+
+![game design inspiration](http://res.cloudinary.com/noah-s-kang/image/upload/v1501454727/screenshotmodified_jyrsis.jpg)
 
 *I will replace the above with a screenshot of my own game*
 
