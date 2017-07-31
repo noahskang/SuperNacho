@@ -1,5 +1,5 @@
 # SuperNacho
-Accessible Javascript game inspired by Nacho Libre.
+Side-scrolling Javascript game inspired by Nacho Libre.
 
 ## Background
 
