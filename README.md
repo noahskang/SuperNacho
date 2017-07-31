@@ -51,10 +51,10 @@ Project will also include:
 ## Implementation Timeline
 
 **Day 1:**
-Configure node modules, webpack, and install easel.js.
+Configure node modules, webpack.
 Write basic html entry file.
-Write out basic structure of game objects.
-Use easel.js to render a basic game map.
+render basic game board.
+get png images/sprites for main avatar and background.
 
 **Day 2:**
 Create Nacho object, render Nacho to the canvas, and allow nacho to jump at user command.
@@ -71,6 +71,7 @@ Polish up game so that user can interact with it.
 Style the frontend attractively.
 
 ## Bonus Features
+- [ ] Add advanced sound effects (chip crunching, etc.)
 - [ ] Add respawn points (e.g. http://playbiolab.com/)
 - [ ] Mobile Portability
 - [ ] Add advanced graphic styling.
