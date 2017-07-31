@@ -32,6 +32,7 @@ Project will also include:
 - Use minified version of jQuery to detect user input.
 - Yuki-createJS - allows EaselJS to work with webpack bundler.
 - Webpack to bundle and serve up scripts.
+- Potentially use TweenJS to facilitate animations
 
 **basic game architecture**
 - `map.js` this script will handle logic for rendering `easel.js` objects and rendering them to DOM as they come into the view screen.
