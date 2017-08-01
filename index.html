@@ -2,13 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
-    <!-- linking to CreateJS CDN installs EsaselJS libs to our project  -->
+    <link rel="stylesheet" href="assets/css/stylesheet.css" type="text/css" media="screen"/>
+    <!-- <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script> -->
 
     <title></title>
   </head>
-  <body onload="init()">
-    <div class="main">
+  <body onload>
+    <div class="wrapper">
       <div class="Title">
         SuperNacho!!
       </div>
@@ -16,11 +16,13 @@
         Instructions
       </div>
       <button type="button" name="button">Start Game</button>
+      <!-- <img src="http://res.cloudinary.com/noah-s-kang/image/upload/v1501532646/BG_pi4iym.png"/> -->
     </div>
-    <canvas id="Main-Canvas" width="760" height="600">
 
+    <canvas id="canvas" width="800" height="480">
+      <p>This is some introductory text</p>
     </canvas>
 
-    <script src="./assets/javascripts/bundle.js"></script>
+    <script type="text/javascript" src="./assets/javascripts/bundle.js"></script>
   </body>
 </html>
