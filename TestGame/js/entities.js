@@ -66,7 +66,7 @@ let Entities = {
         standRight: new Entities.helpers.Sprite(img, 0, 0, 24, 24),
         standLeft: new Entities.helpers.Sprite(img, 75, 27, 24, 24),
         jumpLeft: new Entities.helpers.Sprite(img, 99, 25, 24, 24),
-        jumpRight: new Entities.helpers.Sprite(img, 96, 0, 24, 24)
+        jumpRight: new Entities.helpers.Sprite(img, 96, 0, 28, 24)
       };
       this.states = {
         // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
