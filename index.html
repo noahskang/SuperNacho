@@ -16,13 +16,15 @@
         Instructions
       </div>
       <button type="button" name="button">Start Game</button>
-      <!-- <img src="http://res.cloudinary.com/noah-s-kang/image/upload/v1501532646/BG_pi4iym.png"/> -->
+      <button id="mute-sound" type="button" name="button">Toggle Mute</button>
     </div>
 
-    <canvas id="canvas" width="800" height="480">
-      <p>This is some introductory text</p>
-    </canvas>
+    <canvas id="bg-canvas" width="768" height="600"></canvas>
+    <!-- background will contain background -->
+    <canvas id="fg-canvas" width="768" height="600"></canvas>
+    <!-- foreground will contain all the game entities -->
 
+   <script src="./assets/javascripts/jquery.min.js"></script>
     <script type="text/javascript" src="./assets/javascripts/bundle.js"></script>
   </body>
 </html>
