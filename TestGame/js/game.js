@@ -50,7 +50,7 @@ let Game = {
           audio.src = backgroundMusic[i];
           audio.play();
       }, true);
-      audio.volume = i===0 ? 0.3 : 0.2;
+      audio.volume = i===0 ? 0.5 : 0.3;
       audio.loop = false;
       audio.src = backgroundMusic[0];
       audio.play();

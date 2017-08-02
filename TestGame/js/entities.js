@@ -14,6 +14,8 @@ let Entities = {
 
     var nacho = new Entities.helpers.Nacho(data.spriteSheet, 150, 10, 64, 64);
 
+    var score = new Entities.helpers.Score(290, 70);
+
     let coinLocations = [[269, 120], [317, 120], [365, 120], [413, 120], [461, 120],
                              [221, 210], [269, 210], [317, 210], [365, 210], [413, 210], [461, 210], [509, 210],
                              [221, 300], [269, 300], [317, 300], [365, 300], [413, 300], [461, 300], [509, 300]];
@@ -23,10 +25,12 @@ let Entities = {
 
     data.entities = {};
 
+// adding our new entities to our game object.
     data.entities.background = background;
     data.entities.nacho = nacho;
     data.entities.coinsArray = [];
     data.entities.wallsArray = [];
+    data.entities.score = score;
 
     // loop through the locations to create a new coin for each location element.
     coinLocations.forEach(function(location){
@@ -49,7 +53,7 @@ let Entities = {
 
     Nacho: function(img, x, y, w, h){
       var self = this;
-      this.jumpSound = new Audio("audio/lumbernacho_jump.mp3");
+      this.jumpSound = new Audio("audio/supernacho_jump.mp3");
       this.sprite = new Entities.helpers.Sprite(img, 0, 0, 24, 24);
       this.sprite = new Entities.helpers.Sprite(img, 0, 0, 24, 24);
       this.spriteAnimations = {
@@ -66,7 +70,7 @@ let Entities = {
         standRight: new Entities.helpers.Sprite(img, 0, 0, 24, 24),
         standLeft: new Entities.helpers.Sprite(img, 75, 27, 24, 24),
         jumpLeft: new Entities.helpers.Sprite(img, 99, 25, 24, 24),
-        jumpRight: new Entities.helpers.Sprite(img, 96, 0, 28, 24)
+        jumpRight: new Entities.helpers.Sprite(img, 98, 0, 28, 24)
       };
       this.states = {
         // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
@@ -149,12 +153,21 @@ let Entities = {
       this.h = h;
     },
 
+    Score: function (x, y) {
+      this.value = 0;
+      this.x = x;
+      this.y = y;
+      this.size = "25px";
+      this.font = "PixelEmulator";
+      this.color = "white";
+    },
+
 // coin class that we can use to create multiple coins.
     Coin: function(img, x, y, w, h){
       let self = this;
 
-      this.type = "Coin";
-      this.sound = new Audio("audio/lumbernacho_coin.mp3");
+      this.type = "coin";
+      this.sound = new Audio("audio/supernacho_coin.mp3");
       this.sprite = new Entities.helpers.Sprite(img, 172, 22, 31, 23);
       this.spriteAnimations = {
         spin: {

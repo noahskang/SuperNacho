@@ -7,6 +7,7 @@ let Render = {
   update: function(data){
     // we clear the WHOLE screen every time.( we could just do part)
     data.canvas.fgCtx.clearRect(0, 0, data.canvas.fgCanvas.width, data.canvas.fgCanvas.height);
+    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx);
 
     // make sure the second argument is WHERE i want to draw him
     Render.helpers.drawEntity(data.entities.nacho, data.canvas.fgCtx);
@@ -26,6 +27,12 @@ let Render = {
                 entity.sprite.srcW, entity.sprite.srcH,
                 entity.x, entity.y,
                 entity.w, entity.h);
+    },
+
+    drawText: function(text, ctx){
+      ctx.font = text.size + " " + text.font;
+      ctx.fillStyle = text.color;
+      ctx.fillText("Coins:" + " " + text.value, text.x, text.y);
     }
   }
 };

@@ -21,6 +21,10 @@ var Physics = {
         data.entities.wallsArray.forEach(function (wall) {
             entityCollisionCheck(wall);
         });
+
+        data.entities.coinsArray.forEach(function(coin){
+          entityCollisionCheck(coin);
+        });
     },
 
     handleCollision: function (data, entity) {
@@ -44,6 +48,17 @@ var Physics = {
                 nacho.y = entity.y - nacho.h;
                 nacho.velY = 0;
             }
+        }
+
+        if (entity.type === "coin") {
+          var coinsArray = data.entities.coinsArray;
+          var coinSound = entity.sound.cloneNode();
+          var index = coinsArray.indexOf(entity);
+
+          data.entities.score.value += 1;
+
+          coinSound.play();
+          coinsArray.splice(index, 1);
         }
     },
 
