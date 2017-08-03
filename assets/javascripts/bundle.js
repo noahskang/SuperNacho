@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -105,15 +105,248 @@ class Entity{
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
+
+
+class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y, w, h){
+
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23);
+
+    super(type, sprite, x, y, w, h);
+
+    this.sound = new Audio("audio/supernacho_chip.mp3");
+
+    this.spriteAnimations = {
+      spin: {
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 31, 23),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 31, 23),
+                ],
+        currentFrame: 0
+      }
+    };
+
+    let self = this;
+
+    this.states = {
+      spinning: {
+        animation: data => {
+          if (data.animationFrame % 13 === 0) {
+            // console.log("self: ", self);
+            self.sprite = self.spriteAnimations.spin.frames[self.spriteAnimations.spin.currentFrame];
+            self.spriteAnimations.spin.currentFrame++;
+
+            if (self.spriteAnimations.spin.currentFrame > 2) {
+              self.spriteAnimations.spin.currentFrame = 0;
+            }
+          }
+        }
+      }
+    };
+    this.currentState = self.states.spinning;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Chip;
+
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
+
+
+class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
+
+  constructor(type, spritesheet, x, y, w, h){
+
+    let sprite = new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24);
+
+    super(type, sprite, x, y, w, h);
+
+    this.jumpSound = new Audio("audio/supernacho_jump.mp3");
+
+    this.spriteAnimations = {
+      walkRight: {
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 24, 0, 24, 24),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 48, 0, 24, 24),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 0, 24, 24)],
+        currentFrame: 0
+      },
+      walkLeft: {
+          frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 51, 26, 24, 24),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 26, 25, 24, 24),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 26, 24, 24)],
+          currentFrame: 0
+      },
+      standRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24),
+      standLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 76, 27, 24, 24),
+      jumpLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 99, 25, 24, 24),
+      jumpRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 98, 0, 28, 24)
+    };
+    let self = this;
+    this.states = {
+      // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
+      jumping: {
+        movement: data => {
+          if(this.velY === 0){
+            var jumpSound = this.jumpSound.cloneNode();
+            jumpSound.volume = 0.3;
+            jumpSound.play();
+            this.velY = -23;
+            this.y += this.velY;
+          }
+
+        },
+        animation: data => {
+          if (this.direction === "right") {
+            this.sprite = self.spriteAnimations.jumpRight;
+          } else {
+            this.sprite = self.spriteAnimations.jumpLeft;
+          }
+        }
+      },
+      standing: {
+        movement: data => {
+          return;
+        },
+        animation: function(data){
+          if (this.direction === "right") {
+            this.sprite = self.spriteAnimations.standRight;
+          } else {
+            this.sprite = self.spriteAnimations.standLeft;
+          }
+        }
+      },
+      walking: {
+        movement: data => {
+          if (this.direction === "right") {
+            this.x += this.velX;
+          } else {
+            this.x -= this.velX;
+          }
+        },
+        animation: data => {
+          if (this.direction === "right") {
+            if (data.animationFrame % 5 === 0) {
+              this.sprite = self.spriteAnimations.walkRight.frames[self.spriteAnimations.walkRight.currentFrame];
+              self.spriteAnimations.walkRight.currentFrame++;
+
+              if (self.spriteAnimations.walkRight.currentFrame > 2) {
+                self.spriteAnimations.walkRight.currentFrame = 0;
+              }
+            }
+          } else {
+            if (data.animationFrame % 5 === 0) {
+              this.sprite = self.spriteAnimations.walkLeft.frames[self.spriteAnimations.walkLeft.currentFrame];
+              self.spriteAnimations.walkLeft.currentFrame++;
+
+              if (self.spriteAnimations.walkLeft.currentFrame > 2) {
+                self.spriteAnimations.walkLeft.currentFrame = 0;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    this.currentState = this.states.standing;
+    this.direction = "right";
+    this.velY = 0;
+    this.velX = 3.8;
+    this.chips = 0;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Nacho;
+
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const Wall = (x, y, w, h) => ({
+    type: "wall",
+    x,
+    y,
+    w,
+    h
+});
+
+/* unused harmony default export */ var _unused_webpack_default_export = (Wall);
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
+
+
+class Background extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 768;
+    let h = 600;
+
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 288, 432, 324);
+
+    super(type, sprite, x, y, w, h);
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Background;
+
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const Score = (x, y) => ({
+  value: 0,
+  size: "25px",
+  font: "PixelEmulator",
+  color: "red",
+  x,
+  y
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (Score);
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_input__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_render__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_movement__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_animation__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_entities__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_map_creator__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__map_levels__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util_input__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_render__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_movement__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_animation__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_entities__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_map_creator__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__map_levels__ = __webpack_require__(17);
 
 
 
@@ -227,10 +460,13 @@ game.init();
 
 
 /***/ }),
-/* 3 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entities_ninja_star__ = __webpack_require__(9);
+
+
 const Input = {
   init(data){
     var self = this;
@@ -274,6 +510,11 @@ const Input = {
     if (Input.helpers.isDown(38)) {
       nacho.currentState = nacho.states.jumping;
     }
+
+    // Spacebar
+    if (Input.helpers.isDown(32)) {
+      Object(__WEBPACK_IMPORTED_MODULE_0__entities_ninja_star__["a" /* default */])(data, nacho.x+20, nacho.y+5);
+    }
   },
 
   helpers: {
@@ -301,7 +542,52 @@ const Input = {
 
 
 /***/ }),
-/* 4 */
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
+
+
+class NinjaStar extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, data, x, y){
+    let w = 15;
+    let h = 15;
+
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](data.spriteSheet, 172, 22, 31, 23);
+
+    super(type, sprite, x, y, w, h);
+
+    this.sound = new Audio("audio/pitch.mp3");
+
+    this.velX = -9;
+    // if nacho is facing left, the ninjastar will fly left instead of right
+    if(data.entities.nacho.direction === "left"){
+      this.velX = 9;
+    }
+    this.x=x;
+    this.w = w;
+  }
+  movement(data){
+    this.x -= this.velX;
+  }
+}
+
+const FireStar = (data, x, y) => {
+  console.log("Is this getting hit?");
+  let ninjastar = new NinjaStar("ninjastar", data, x, y);
+  data.entities.ninjastars.push(ninjastar);
+};
+/* unused harmony export FireStar */
+
+
+/* harmony default export */ __webpack_exports__["a"] = (FireStar);
+
+
+/***/ }),
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -328,6 +614,10 @@ const Render = {
 
     data.entities.chipsArray.forEach((chip)=>{
       Render.helpers.drawEntity(chip, data);
+    });
+
+    data.entities.ninjastars.forEach((star)=>{
+      Render.helpers.drawEntity(star, data);
     });
   },
 
@@ -373,13 +663,14 @@ const Render = {
 
 
 /***/ }),
-/* 5 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 const Movement = {
   update: data => {
     nacho(data);
+    ninjastar(data);
   },
 };
 
@@ -387,11 +678,21 @@ const nacho = data => {
   data.entities.nacho.currentState.movement(data);
 };
 
+const ninjastar = data => {
+  // first, remove all the ninjastars that have gone off the edge of the screen.
+  data.entities.ninjastars = data.entities.ninjastars.filter(star => {
+    return star.x > data.viewport.vX && (star.x+star.w) < (data.viewport.vX + 768);
+  });
+  data.entities.ninjastars.forEach(star=>{
+    star.movement(data);
+  });
+};
+
 /* harmony default export */ __webpack_exports__["a"] = (Movement);
 
 
 /***/ }),
-/* 6 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -477,7 +778,7 @@ const Physics = {
 
 
 /***/ }),
-/* 7 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -502,15 +803,15 @@ const chips = data => {
 
 
 /***/ }),
-/* 8 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__chip__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__nacho__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__walls__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__background__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__score__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__chip__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__nacho__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__walls__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__background__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__score__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__sprite__ = __webpack_require__(0);
 
 // import Corn from "./corn";
@@ -537,10 +838,13 @@ const Entities = {
                              [221, 210], [269, 210], [317, 210], [365, 210], [413, 210], [461, 210], [509, 210],
                              [221, 300], [269, 300], [317, 300], [365, 300], [413, 300], [461, 300], [509, 300]];
 
+    let ninjastars = [];
+
     data.entities.background = background;
     data.entities.nacho = nacho;
     // data.entities.wallsArray = [];
     data.entities.score = score;
+    data.entities.ninjastars = ninjastars;
     data.entities.chipsArray = data.entities.chipsArray || [];
 
   // loop through locations to create a new coin for each location element
@@ -558,249 +862,16 @@ const Entities = {
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
-
-
-
-class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
-  constructor(type, spritesheet, x, y, w, h){
-
-    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23);
-
-    super(type, sprite, x, y, w, h);
-
-    this.sound = new Audio("audio/supernacho_chip.mp3");
-
-    this.spriteAnimations = {
-      spin: {
-        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 31, 23),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 31, 23),
-                ],
-        currentFrame: 0
-      }
-    };
-
-    let self = this;
-
-    this.states = {
-      spinning: {
-        animation: data => {
-          if (data.animationFrame % 13 === 0) {
-            // console.log("self: ", self);
-            self.sprite = self.spriteAnimations.spin.frames[self.spriteAnimations.spin.currentFrame];
-            self.spriteAnimations.spin.currentFrame++;
-
-            if (self.spriteAnimations.spin.currentFrame > 2) {
-              self.spriteAnimations.spin.currentFrame = 0;
-            }
-          }
-        }
-      }
-    };
-    this.currentState = self.states.spinning;
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Chip;
-
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
-
-
-
-class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
-
-  constructor(type, spritesheet, x, y, w, h){
-
-    let sprite = new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24);
-
-    super(type, sprite, x, y, w, h);
-
-    this.jumpSound = new Audio("audio/supernacho_jump.mp3");
-
-    this.spriteAnimations = {
-      walkRight: {
-        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 24, 0, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 48, 0, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 0, 24, 24)],
-        currentFrame: 0
-      },
-      walkLeft: {
-          frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 51, 26, 24, 24),
-                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 26, 25, 24, 24),
-                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 26, 24, 24)],
-          currentFrame: 0
-      },
-      standRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24),
-      standLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 75, 27, 24, 24),
-      jumpLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 99, 25, 24, 24),
-      jumpRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 98, 0, 28, 24)
-    };
-    let self = this;
-    this.states = {
-      // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
-      jumping: {
-        movement: data => {
-          if(this.velY === 0){
-            var jumpSound = this.jumpSound.cloneNode();
-            jumpSound.volume = 0.3;
-            jumpSound.play();
-            this.velY = -23;
-            this.y += this.velY;
-          }
-
-        },
-        animation: data => {
-          if (this.direction === "right") {
-            this.sprite = self.spriteAnimations.jumpRight;
-          } else {
-            this.sprite = self.spriteAnimations.jumpLeft;
-          }
-        }
-      },
-      standing: {
-        movement: data => {
-          return;
-        },
-        animation: function(data){
-          if (this.direction === "right") {
-            this.sprite = self.spriteAnimations.standRight;
-          } else {
-            this.sprite = self.spriteAnimations.standLeft;
-          }
-        }
-      },
-      walking: {
-        movement: data => {
-          if (this.direction === "right") {
-            this.x += this.velX;
-          } else {
-            this.x -= this.velX;
-          }
-        },
-        animation: data => {
-          if (this.direction === "right") {
-            if (data.animationFrame % 5 === 0) {
-              this.sprite = self.spriteAnimations.walkRight.frames[self.spriteAnimations.walkRight.currentFrame];
-              self.spriteAnimations.walkRight.currentFrame++;
-
-              if (self.spriteAnimations.walkRight.currentFrame > 2) {
-                self.spriteAnimations.walkRight.currentFrame = 0;
-              }
-            }
-          } else {
-            if (data.animationFrame % 5 === 0) {
-              this.sprite = self.spriteAnimations.walkLeft.frames[self.spriteAnimations.walkLeft.currentFrame];
-              self.spriteAnimations.walkLeft.currentFrame++;
-
-              if (self.spriteAnimations.walkLeft.currentFrame > 2) {
-                self.spriteAnimations.walkLeft.currentFrame = 0;
-              }
-            }
-          }
-        }
-      }
-    };
-
-    this.currentState = this.states.standing;
-    this.direction = "right";
-    this.velY = 0;
-    this.velX = 3.8;
-    this.chips = 0;
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Nacho;
-
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const Wall = (x, y, w, h) => ({
-    type: "wall",
-    x,
-    y,
-    w,
-    h
-});
-
-/* unused harmony default export */ var _unused_webpack_default_export = (Wall);
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
-
-
-
-class Background extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
-  constructor(type, spritesheet, x, y){
-    let w = 768;
-    let h = 600;
-
-    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 288, 432, 324);
-
-    super(type, sprite, x, y, w, h);
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Background;
-
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const Score = (x, y) => ({
-  value: 0,
-  size: "25px",
-  font: "PixelEmulator",
-  color: "red",
-  x,
-  y
-});
-
-/* harmony default export */ __webpack_exports__["a"] = (Score);
-
-
-/***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__entities_chip__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__entities_nacho__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__entities_walls__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__entities_background__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_score__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__entities_chip__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__entities_nacho__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__entities_walls__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__entities_background__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_score__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__entities_sprite__ = __webpack_require__(0);
 
 
@@ -973,150 +1044,6 @@ class Map{
 
 
 /***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-// my game board is going to be... 15360 pixels across (that's 768 * 20).
-// If I divide that by 24 (the default size of an entity), that means I need to provide logic for 640 squares.
-// that's way too many to do manually... Instead... I'll build a couple of default 768 * 600 views. And then splice 24 of those together for a game map. In order to increase difficulty, I'll use Math.random to throw in a random number of enemies.
-
-const One = () => {
-  let screenorder = [screen_one, screen_two, screen_three, screen_four, screen_five, screen_six, screen_seven];
-  return screenorder;
-};
-/* harmony export (immutable) */ __webpack_exports__["a"] = One;
-
-
-const screen_one=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. SI .. .. .. .. .. .. CH CA CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
-"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
-"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
-
-const screen_two=[
-".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. CA CA .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
-"GR GR GR GR GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
-"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
-
-const screen_three=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH CH CH CH CH CH .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. CH .. .. CA BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH .. .. ..",
-".. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
-"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
-
-const screen_four=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. FL FM FM FM FM FR FM .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-"GR GR GR GR RG .. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
-"UG UG UG UG UG .. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
-
-const screen_five=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX .. CA .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX BX .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. CH CH CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. CA .. .. .. .. .. .. BX BX BX BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-"GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-"UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .."];
-
-const screen_six=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. CH .. BX .. .. .. .. BX .. CH .. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. ..",
-".. .. .. .. .. .. BX .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. BX .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA CA CA CA CA .. .. .. BX BX .. .. CH CH .. ..",
-"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
-"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
-
-const screen_seven=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. CH CH .. .. .. CA CA .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. CH CH .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. CA .. .. ..",
-"GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
-"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
-
-
-/***/ }),
 /* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1255,6 +1182,146 @@ class Sign extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
 }
 /* harmony export (immutable) */ __webpack_exports__["i"] = Sign;
 
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+// my game board is going to be... 15360 pixels across (that's 768 * 20).
+// If I divide that by 24 (the default size of an entity), that means I need to provide logic for 640 squares.
+// that's way too many to do manually... Instead... I'll build a couple of default 768 * 600 views. And then splice 24 of those together for a game map. In order to increase difficulty, I'll use Math.random to throw in a random number of enemies.
+
+const One = () => {
+  let screenorder = [screen_one, screen_two, screen_three, screen_four, screen_five, screen_six, screen_seven];
+  return screenorder;
+};
+/* harmony export (immutable) */ __webpack_exports__["a"] = One;
+
+
+const screen_one=[
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. SI .. .. .. CH .. .. CH CA CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_two=[
+".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. CA CA .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_three=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH CH CH CH CH CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. CH .. .. CA BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH .. .. ..",
+".. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_four=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. FL FM FM FM FM FR FM .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR RG .. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG .. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_five=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX .. CA .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX BX .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. CH CH CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. CA .. .. .. .. .. .. BX BX BX BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .."];
+
+const screen_six=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. CH .. BX .. .. .. .. BX .. CH .. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. ..",
+".. .. .. .. .. .. BX .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. BX .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA CA CA CA CA .. .. .. BX BX .. .. CH CH .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_seven=[
+".. .. .. .. .. .. .. .. CH CH .. .. .. CA CA .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. CH CH .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. CA .. .. ..",
+"GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
 
 /***/ })
