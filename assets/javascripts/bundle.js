@@ -145,7 +145,7 @@ class Game {
     const viewport = {
       width: 760,
       height: 600,
-      vX: 0,
+      vX: 0.5,
       vY: 0,
     };
 
@@ -225,7 +225,7 @@ class Game {
     __WEBPACK_IMPORTED_MODULE_2__util_movement__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_3__util_physics__["a" /* default */].update(data);
   }
-  // write an update view method to sidescroll the viewport
+
 }
 
 let game = new Game();
@@ -333,6 +333,13 @@ const Render = {
   helpers: {
     // now when we call image, we can just call drawEntity, and the image will be drawn.
     drawEntity: (entity, ctx)=>{
+
+// add logic so that the render ONLY draws object that are actually in the viewport screen.
+// The default width of my game itself will be like.... 15500px. a little bit more than 20 * the width of teh viewport.
+// objects will have an x position on the game.
+// the viewport is moving right at a vX of 0.5... so the viewport's x position will be 1. then 1.5. then 1.2.
+// the viewport isn't really a square. it's better to think of it as a set of coordinates that are scrolling across our map, telling us what we want to render at the given moment.
+
       // we set the sprite, and the source x,
       ctx.drawImage(entity.sprite.img,
                 entity.sprite.srcX, entity.sprite.srcY,
@@ -775,8 +782,67 @@ class Map{
 
 /***/ }),
 /* 15 */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+// my game board is going to be... 15360 pixels across (that's 768 * 20).
+// If I divide that by 24 (the default size of an entity), that means I need to provide logic for 640 squares.
+// that's way too many to do manually... Instead... I'll build a couple of default 768 * 600 views. And then splice 24 of those together for a game map. In order to increase difficulty, I'll use Math.random to throw in a random number of enemies.
+
+const ONE = [
+
+];
+/* unused harmony export ONE */
+
+
+const flatground = () => {
+  // add a row of flat ground
+  let array = [];
+  for(let i=0; i<32; i++){
+    array.push("UG");
+  }
+  return array;
+};
+
+const middlehill = () => {
+  // start the map with flatground
+  let array = [[flatground]];
+  // add a mountain that is 5 levels high
+  // cover the bare dirt with the topsoil tile
+  for(let i=0; i<5; i++){
+    let row = [];
+    for(let j=0; j<32; j++){
+      if(j>10&& j < 18){
+        row.push("UG");
+      }else{
+        if(i===0){
+          row.push("GR");
+        } else {
+          row.push(" ");
+        }
+      }
+    }
+    array.unshift(row);
+  }
+  let row = [];
+  // add the top of the mountain
+  for(let i=0; i<32; i++){
+    if(i===11){
+      row.push("LG");
+    }
+    else if(i>11&& i < 17){
+      row.push("RG");
+    }
+    else if(i===17){
+      row.push("LG");
+    }
+    else{
+      row.push(" ");
+    }
+  }
+  array.unshift(row);
+  return array;
+};
 
 
 /***/ })
