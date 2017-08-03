@@ -68,6 +68,24 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+class Sprite{
+  constructor(img, srcX, srcY, srcW, srcH){
+    this.img = img;
+    this.srcX = srcX;
+    this.srcY = srcY;
+    this.srcW = srcW;
+    this.srcH = srcH;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Sprite;
+
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 class Entity{
   constructor(type, sprite, x, y, w, h){
     this.type = type;
@@ -79,24 +97,6 @@ class Entity{
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Entity;
-
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class Sprite{
-  constructor(img, srcX, srcY, srcW, srcH){
-    this.img = img;
-    this.srcX = srcX;
-    this.srcY = srcY;
-    this.srcW = srcW;
-    this.srcH = srcH;
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Sprite;
 
 
 
@@ -114,7 +114,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_entities__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_map_creator__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__map_levels__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__map_levels___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__map_levels__);
 
 
 
@@ -145,7 +144,7 @@ class Game {
     const viewport = {
       width: 760,
       height: 600,
-      vX: 0.5,
+      vX: 1,
       vY: 0,
     };
 
@@ -176,7 +175,7 @@ class Game {
 
       let data = {
         animationFrame: 0,
-        mapCreator: new __WEBPACK_IMPORTED_MODULE_6__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_7__map_levels__["one"], tileSet, spriteSheet),
+        mapCreator: new __WEBPACK_IMPORTED_MODULE_6__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_7__map_levels__["a" /* One */](), tileSet, spriteSheet),
         spriteSheet,
         entities: {},
         tileSet,
@@ -211,7 +210,9 @@ class Game {
       __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].update(data);
       // animate character
       this.update(data);
+      this.updateViewPort(data);
       __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].update(data);
+
       // every time the loop runs, add a tick to the animation frame.
       data.animationFrame++;
 
@@ -224,6 +225,11 @@ class Game {
     __WEBPACK_IMPORTED_MODULE_4__util_animation__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_2__util_movement__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_3__util_physics__["a" /* default */].update(data);
+  }
+
+  updateViewPort(data){
+    console.log(data.entities);
+    data.viewport.vX++;
   }
 
 }
@@ -313,40 +319,50 @@ const Input = {
 "use strict";
 const Render = {
   init: data =>{
-    Render.helpers.drawEntity(data.entities.background, data.canvas.bgCtx);
+    data.entities.map= [];
+    data.entities.bg = [];
+    data.entities.chipsArray = data.entities.chipsArray || [];
+    data.mapCreator.create(data);
   },
 
   // we draw chips on update method because we need to re render any time our character runs through a chip. (dynamic update necessary)
   update: data=>{
     // we clear the WHOLE screen every time.( we could just do part)
     data.canvas.fgCtx.clearRect(0, 0, data.canvas.fgCanvas.width, data.canvas.fgCanvas.height);
-    // Render.helpers.drawText(data.entities.score, data.canvas.fgCtx);
 
-    // make sure the second argument is WHERE i want to draw him
-    Render.helpers.drawEntity(data.entities.nacho, data.canvas.fgCtx);
+    data.mapCreator.renderMap(data);
+
+    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx);
+
+    // only draw elements that are in the viewport:
+
+    Render.helpers.drawEntity(data.entities.nacho, data);
 
     data.entities.chipsArray.forEach((chip)=>{
-      Render.helpers.drawEntity(chip, data.canvas.fgCtx);
+      Render.helpers.drawEntity(chip, data);
     });
   },
 
   helpers: {
     // now when we call image, we can just call drawEntity, and the image will be drawn.
-    drawEntity: (entity, ctx)=>{
+    drawEntity: (entity, data)=>{
 
 // add logic so that the render ONLY draws object that are actually in the viewport screen.
-// The default width of my game itself will be like.... 15500px. a little bit more than 20 * the width of teh viewport.
-// objects will have an x position on the game.
-// the viewport is moving right at a vX of 0.5... so the viewport's x position will be 1. then 1.5. then 1.2.
-// the viewport isn't really a square. it's better to think of it as a set of coordinates that are scrolling across our map, telling us what we want to render at the given moment.
+      let viewport = data.viewport;
+      const ctx = data.canvas.fgCtx;
 
-      // we set the sprite, and the source x,
-      ctx.drawImage(entity.sprite.img,
-                entity.sprite.srcX, entity.sprite.srcY,
-                entity.sprite.srcW, entity.sprite.srcH,
-                entity.x, entity.y,
-                entity.w, entity.h);
-    },
+      if(((entity.x + entity.w >= viewport.vX &&
+          entity.x + entity.w <= viewport.vX + viewport.width)) &&
+        ((entity.y + entity.h >= viewport.vY &&
+          entity.y + entity.h <= viewport.vY + viewport.height))){
+        ctx.drawImage(
+          entity.sprite.img,
+          entity.sprite.srcX, entity.sprite.srcY,
+          entity.sprite.srcW, entity.sprite.srcH,
+          entity.x, entity.y,
+          entity.w, entity.h);
+        }
+      },
 
     drawText: (text, ctx)=>{
       ctx.font = text.size + " " + text.font;
@@ -402,6 +418,10 @@ const Physics = {
       }
     };
 
+    data.entities.map.forEach(function(element){
+      entityCollisionCheck(element);
+    });
+
     data.entities.wallsArray.forEach(function (wall) {
       entityCollisionCheck(wall);
     });
@@ -414,7 +434,7 @@ const Physics = {
     handleCollision: function (data, entity) {
       let nacho = data.entities.nacho;
 
-      if (entity.type === "wall") {
+      if (["wall", "gound", "underground", "rightcorner", "leftcorner", "box", "floatleft", "floatright", "floatmiddle"].includes(entity.type)){
         //Left Side Wall Collision
         if (nacho.x < entity.x && nacho.y >= entity.y) {
           nacho.x = entity.x - nacho.w;
@@ -494,7 +514,7 @@ const chips = data => {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__walls__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__background__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__score__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__sprite__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__sprite__ = __webpack_require__(0);
 
 // import Corn from "./corn";
 
@@ -513,8 +533,7 @@ const Entities = {
 
     let nacho = new __WEBPACK_IMPORTED_MODULE_1__nacho__["a" /* default */]("nacho", data.spriteSheet, 40, 10, 64, 64);
 
-    let wallLocations = [[0, 0, 4, 600], [0, 500, 768, 150],
-                      [225, 365, 336, 216], [767, 0, 4, 600]];
+    let wallLocations = [[0, 0, 4, 600], [767, 0, 4, 600]];
 
     let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(290, 70);
 
@@ -524,9 +543,9 @@ const Entities = {
 
     data.entities.background = background;
     data.entities.nacho = nacho;
-    data.entities.chipsArray = [];
     data.entities.wallsArray = [];
-     data.entities.score = score;
+    data.entities.score = score;
+    data.entities.chipsArray = data.entities.chipsArray || [];
 
   // loop through locations to create a new coin for each location element
     chipLocations.forEach(function (location) {
@@ -547,8 +566,8 @@ const Entities = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
 
 
 
@@ -563,9 +582,9 @@ class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
 
     this.spriteAnimations = {
       spin: {
-        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 31, 23),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 31, 23),
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 24, 24),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 24, 24),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 24, 24),
                 ],
         currentFrame: 0
       }
@@ -604,8 +623,8 @@ class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
 
 
 
@@ -737,10 +756,19 @@ const Wall = (x, y, w, h) => ({
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
 
 
 class Background extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 216, 72, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+  }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Background;
 
@@ -768,14 +796,193 @@ const Score = (x, y) => ({
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__entities_chip__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__entities_nacho__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__entities_walls__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__entities_background__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_score__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__entities_sprite__ = __webpack_require__(0);
+
+
+// import Corn from "./corn";
+
+
+
+
+
 
 class Map{
-  constructor(level, tiles, sprites){
+  constructor(level, tileset, spritesheet){
     this.level = level;
-    this.tiles = tiles;
-    this.sprites = sprites;
+    this.tileset = tileset;
+    this.spritesheet = spritesheet;
+
+    this.mapElements = [];
+    this.bgElements = [];
+    this.chips = [];
+
+    this.level.forEach((screen, i) => {
+      // reverse the order of rows here...
+      // so that rendering is done bottom to top
+
+      screen.reverse().forEach((row, j) =>{
+        let xScreenStart = i*768;
+
+        let bgSprite = new __WEBPACK_IMPORTED_MODULE_6__entities_sprite__["a" /* default */](this.tileSet, 72, 288, 432, 324);
+        this.bgElements.push("background", bgSprite, 0, 0, 768, 600);
+        // each entity is 24 pixels tall. 600/24 equals 24. So the starting 6 position of each entity will be calculated as follows:
+        let yPos = (24-j)*24;
+        row.split(" ").forEach((el, idx)=>{
+          let xPos = xScreenStart + (idx * 24);
+          switch(el) {
+            case "GR":
+              this.createGround(xPos, yPos);
+              break;
+            case "UG":
+              this.createUnderground(xPos, yPos);
+              break;
+            case "RG":
+              this.createRightCorner(xPos, yPos);
+              break;
+            case "LG":
+              this.createLeftCorner(xPos, yPos);
+              break;
+            case "CA":
+              this.createCactus(xPos, yPos);
+              break;
+            case "CH":
+              this.createChip(xPos, yPos);
+              break;
+            case "SI":
+              this.createSign(xPos, yPos);
+              break;
+            case "BX":
+              this.createBox(xPos, yPos);
+              break;
+            case "FL":
+              this.createFloatLeft(xPos, yPos);
+              break;
+            case "FR":
+              this.createFloatRight(xPos, yPos);
+              break;
+            case "FM":
+              this.createFloatMiddle(xPos, yPos);
+              break;
+            default:
+              break;
+          }
+        });
+      });
+    });
+  }
+
+  createGround(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["f" /* Ground */]("ground", this.tileset, x, y)
+    );
+  }
+
+  createUnderground(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["j" /* Underground */]("underground", this.tileset, x, y)
+    );
+  }
+
+  createRightCorner(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["h" /* RightCorner */]("rightcorner", this.tileset, x, y)
+    );
+  }
+
+  createLeftCorner(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["g" /* LeftCorner */]("leftcorner", this.tileset, x, y)
+    );
+  }
+
+  createCactus(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["b" /* Cactus */]("cactus", this.tileset, x, y)
+    );
+  }
+
+  createChip(x, y){
+    this.chips.push(
+      new __WEBPACK_IMPORTED_MODULE_1__entities_chip__["a" /* default */]("chip", this.spritesheet, x, y, 24, 24)
+    );
+  }
+
+  createSign(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["i" /* Sign */]("sign", this.tileset, x, y)
+    );
+  }
+
+  createBox(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["a" /* Box */]("box", this.tileset, x, y)
+    );
+  }
+
+  createFloatLeft(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["c" /* FloatLeft */]("floatleft", this.tileset, x, y)
+    );
+  }
+
+  createFloatRight(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["e" /* FloatRight */]("floatright", this.tileset, x, y)
+    );
+  }
+
+  createFloatMiddle(x, y){
+    this.mapElements.push(
+      new __WEBPACK_IMPORTED_MODULE_0__entities_map_elements__["d" /* FloatMiddle */]("floatmiddle", this.tileset, x, y)
+    );
+  }
+
+  create(data){
+    this.mapElements.forEach((element) =>{
+      data.entities.map.push(element);
+    });
+    this.bgElements.forEach((element) =>{
+      data.entities.map.push(element);
+    });
+    data.entities.chipsArray.concat(this.chips);
+  }
+
+  renderMap(data){
+    this.mapElements.forEach((element) =>{
+      this.drawEntity(element, data);
+    });
+    this.bgElements.forEach((element) => {
+      this.drawEntity(element, data);
+    });
+    this.chips.forEach((chip) => {
+      this.drawEntity(chip, data);
+    });
+  }
+
+  drawEntity(entity, data){
+    const ctx = data.canvas.fgCtx;
+    if(entity.type === "background"){
+      ctx= data.canvas.bgCtx;
+    }
+    const viewport = data.viewport;
+
+    if(((entity.x + entity.w >= viewport.vX && entity.x + entity.w <= viewport.vX + viewport.width)) && ((entity.y + entity.h >= viewport.vY && entity.y + entity.h <= viewport.vY + viewport.height))){
+      ctx.drawImage(
+        entity.sprite.img,
+        entity.sprite.srcX, entity.sprite.srcY,
+        entity.sprite.srcW, entity.sprite.srcH,
+        entity.x, entity.y,
+        entity.w, entity.h);
+    }
   }
 }
+
 
 /* harmony default export */ __webpack_exports__["a"] = (Map);
 
@@ -789,60 +996,280 @@ class Map{
 // If I divide that by 24 (the default size of an entity), that means I need to provide logic for 640 squares.
 // that's way too many to do manually... Instead... I'll build a couple of default 768 * 600 views. And then splice 24 of those together for a game map. In order to increase difficulty, I'll use Math.random to throw in a random number of enemies.
 
-const ONE = [
-
-];
-/* unused harmony export ONE */
-
-
-const flatground = () => {
-  // add a row of flat ground
-  let array = [];
-  for(let i=0; i<32; i++){
-    array.push("UG");
-  }
-  return array;
+const One = () => {
+  let screenorder = [screen_one, screen_two, screen_three, screen_four, screen_five, screen_six, screen_seven];
+  return screenorder;
 };
+/* harmony export (immutable) */ __webpack_exports__["a"] = One;
 
-const middlehill = () => {
-  // start the map with flatground
-  let array = [[flatground]];
-  // add a mountain that is 5 levels high
-  // cover the bare dirt with the topsoil tile
-  for(let i=0; i<5; i++){
-    let row = [];
-    for(let j=0; j<32; j++){
-      if(j>10&& j < 18){
-        row.push("UG");
-      }else{
-        if(i===0){
-          row.push("GR");
-        } else {
-          row.push(" ");
-        }
-      }
-    }
-    array.unshift(row);
+
+const screen_one=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. SI .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_two=[
+".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. CA CA .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_three=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH CH CH CH CH CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. CH .. .. CA BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH .. .. ..",
+".. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_four=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. FL FM FM FM FM FR FM .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR RG .. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG .. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_five=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX .. CA .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX BX .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. CH CH CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. CA .. .. .. .. .. .. BX BX BX BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+"UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .."];
+
+const screen_six=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. CH .. BX .. .. .. .. BX .. CH .. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. ..",
+".. .. .. .. .. .. BX .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. BX .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA CA CA CA CA .. .. .. BX BX .. .. CH CH .. ..",
+"GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+const screen_seven=[
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. CH CH .. .. .. CA CA .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. CH CH .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. CA .. .. ..",
+"GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
+"UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
+
+
+class Ground extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 216, 72, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
   }
-  let row = [];
-  // add the top of the mountain
-  for(let i=0; i<32; i++){
-    if(i===11){
-      row.push("LG");
-    }
-    else if(i>11&& i < 17){
-      row.push("RG");
-    }
-    else if(i===17){
-      row.push("LG");
-    }
-    else{
-      row.push(" ");
-    }
+}
+/* harmony export (immutable) */ __webpack_exports__["f"] = Ground;
+
+
+class Underground extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 504,  180, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
   }
-  array.unshift(row);
-  return array;
-};
+}
+/* harmony export (immutable) */ __webpack_exports__["j"] = Underground;
+
+
+class RightCorner extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 360, 72, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["h"] = RightCorner;
+
+
+class LeftCorner extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72  , 22, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["g"] = LeftCorner;
+
+
+class Cactus extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 648, 180, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Cactus;
+
+
+class Box extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 504, 72, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Box;
+
+
+class FloatLeft extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 180, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["c"] = FloatLeft;
+
+
+class FloatRight extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 360, 180, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["e"] = FloatRight;
+
+
+class FloatMiddle extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 216, 180, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["d"] = FloatMiddle;
+
+
+class Sign extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 24;
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 648, 72, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["i"] = Sign;
+
 
 
 /***/ })
