@@ -338,7 +338,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_render__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_movement__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__util_physics__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_animation__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_entities__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_map_creator__ = __webpack_require__(15);
@@ -373,7 +372,7 @@ class Game {
     const viewport = {
       width: 760,
       height: 600,
-      vX: 1.3,
+      vX: 25,
       vY: 0,
     };
 
@@ -403,8 +402,8 @@ class Game {
     // this variable is used in the ninjastar method along with a set timeout to space out firing of ninjastars.
     const canFire = true;
     // keeps track of the number of ninjastars we have;
-
-
+    // keeps track of whether or not nacho has died.
+    let fatality = false;
 
     let ninjasound =
     // add a listener to wait until spritesheet is loaded.
@@ -420,6 +419,7 @@ class Game {
           entities: {},
           canvas,
           viewport,
+          fatality,
           sounds: {
             backgroundMusic,
             ninjaSound: new Audio("audio/pitch.mp3"),
@@ -433,12 +433,13 @@ class Game {
         __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].init(data);
         this.run(data);
       });
-  });
-}
+    });
+    this.id;
+  }
+
 
   run (data){
     const loop = () => {
-      // TODO: write game.updateview (to sidesscroll the viewport)
       // get input from user
       __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].update(data);
       // animate character
@@ -449,7 +450,8 @@ class Game {
       // every time the loop runs, add a tick to the animation frame.
       data.animationFrame++;
 
-      window.requestAnimationFrame(loop);
+      this.id=window.requestAnimationFrame(loop);
+
     };
     loop();
   }
@@ -457,14 +459,25 @@ class Game {
   update(data){
     __WEBPACK_IMPORTED_MODULE_4__util_animation__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_2__util_movement__["a" /* default */].update(data);
-    __WEBPACK_IMPORTED_MODULE_3__util_physics__["default"].update(data);
+    __WEBPACK_IMPORTED_MODULE_3__util_physics__["a" /* default */].update(data);
+    if(this.gameOver){
+      window.cancelAnimationFrame(this.id);
+    }
   }
 
   updateViewPort(data){
     data.viewport.vX++;
   }
 
+  gameOver(data){
+    if(data.fatality===true){
+      return true;
+    }
+    return false;
+  }
 }
+
+// have an array of game objects.
 
 let game = new Game();
 game.init();
@@ -638,7 +651,6 @@ const Render = {
       Render.helpers.drawEntity(star, data);
     });
 
-    console.log(data.entities.luchaArray);
     data.entities.luchaArray.forEach((lucha)=>{
       Render.helpers.drawEntity(lucha, data);
     });
@@ -723,10 +735,148 @@ const ninjastar = data => {
 
 /***/ }),
 /* 12 */
-/***/ (function(module, __webpack_exports__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-throw new Error("Module parse failed: /Users/noahkang/Documents/AppAcademy/SuperNacho/lib/util/physics.js Unexpected token (40:54)\nYou may need an appropriate loader to handle this file type.\n|   },\n| \n|     handleCollision: function (data, entity, character:\n| \n|       if ([\"wall\", \"ground\", \"underground\", \"rightcorner\", \"leftcorner\", \"box\", \"floatleft\", \"floatright\", \"floatmiddle\", \"lucha\"].includes(entity.type)){");
+const Physics = {
+  update: function(data){
+    Physics.helpers.gravity(data.entities.nacho);
+
+    data.entities.luchaArray.forEach(lucha=>{
+      Physics.helpers.gravity(lucha);
+    });
+
+    Physics.collisionDetection(data);
+  },
+
+  collisionDetection: function (data) {
+    let nacho = data.entities.nacho;
+
+    let nachoCollisionCheck = function (entity) {
+      // check to see if nacho image intersects with the entity image.
+      if (nacho.x < entity.x + entity.w &&
+        nacho.x + nacho.w > entity.x &&
+        nacho.y < entity.y + entity.h &&
+        nacho.h + nacho.y > entity.y) {
+        //Collision Occured
+        Physics.handleNachoCollision(data, entity);
+      }
+
+    };
+
+    let luchaCollisionCheck = function(entity){
+      let luchaArray = data.entities.luchaArray;
+      luchaArray.forEach((lucha) => {
+        if (lucha.x < entity.x + entity.w &&
+          lucha.x + lucha.w > entity.x &&
+          lucha.y < entity.y + entity.h &&
+          lucha.h + lucha.y > entity.y) {
+          //Collision Occured
+          Physics.handleLuchaCollision(data, entity, lucha);
+        }
+      });
+    };
+
+    data.entities.map.forEach(function(element){
+      nachoCollisionCheck(element);
+      luchaCollisionCheck(element);
+    });
+
+    data.entities.chipsArray.forEach(function(chip){
+      nachoCollisionCheck(chip);
+    });
+
+    data.entities.ninjastars.forEach(function(star){
+      luchaCollisionCheck(star);
+    })
+
+    data.entities.luchaArray.forEach(function(lucha){
+      nachoCollisionCheck(lucha);
+    });
+  },
+
+  handleLuchaCollision: function(data, entity, lucha){
+
+    if (["ground", "underground", "rightcorner", "leftcorner", "box", "floatleft", "floatright", "floatmiddle", "nacho"].includes(entity.type)){
+      //Left Side Entity Collision
+      if (lucha.x < entity.x && lucha.y >= entity.y) {
+        lucha.x = entity.x - lucha.w;
+      }
+
+      //Right Side Entity collision
+      if (lucha.x > entity.x && lucha.y >= entity.y) {
+        lucha.x = entity.x + entity.w;
+      }
+
+      //Top of Entity Collision
+      if (lucha.y < entity.y && (lucha.x + lucha.w) > entity.x + 10 &&
+        lucha.x < (entity.x + entity.w) - 10 && lucha.velY >= 0) {
+        lucha.y = entity.y - lucha.h;
+        lucha.velY = 0;
+      }
+    }
+
+    if (entity.type === "ninjastar") {
+      console.log("collision occurred!");
+      let luchaIndex = data.entities.luchaArray.indexOf(lucha);
+      let ninjastars = data.entities.ninjastars;
+      let starindex = ninjastars.indexOf(entity);
+
+      data.entities.score.value += 10;
+
+      data.entities.luchaArray.splice(luchaIndex, 1);
+      data.entities.ninjastars.splice(starindex, 1);
+    }
+  },
+
+  handleNachoCollision: function (data, entity) {
+    let nacho = data.entities.nacho;
+
+    if (["ground", "underground", "rightcorner", "leftcorner", "box", "floatleft", "floatright", "floatmiddle", "lucha"].includes(entity.type)){
+      //Left Side Wall Collision
+      if (nacho.x < entity.x && nacho.y >= entity.y) {
+        nacho.x = entity.x - nacho.w;
+      }
+
+      //Right Side Wall Collision
+      if (nacho.x > entity.x && nacho.y >= entity.y) {
+        nacho.x = entity.x + entity.w;
+      }
+
+      //Top of Wall Collision
+      if (nacho.y < entity.y && (nacho.x + nacho.w) > entity.x + 10 &&
+        nacho.x < (entity.x + entity.w) - 10 && nacho.velY >= 0) {
+       nacho.currentState = nacho.states.standing;
+        nacho.y = entity.y - nacho.h;
+        nacho.velY = 0;
+      }
+    }
+
+    if (entity.type === "chip") {
+      let chipsArray = data.entities.chipsArray;
+      let index = chipsArray.indexOf(entity);
+
+      data.entities.score.value += 10;
+      data.entities.starCounter.value +=1;
+
+      let chipSound = data.sounds.chipSound.cloneNode();
+      chipSound.play();
+      chipsArray.splice(index, 1);
+    }
+  },
+
+  helpers: {
+    gravity: function(entity){
+      // this will give us acceleration downwards
+      entity.velY += 1.2;
+      entity.y += entity.velY;
+    }
+  }
+
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (Physics);
+
 
 /***/ }),
 /* 13 */
@@ -984,7 +1134,6 @@ class Map{
   }
 
   create(data){
-    console.log("luchas", this.luchaArray);
     this.mapElements.forEach((element) =>{
       data.entities.map.push(element);
     });
@@ -1169,8 +1318,19 @@ class Sign extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
 // If I divide that by 24 (the default size of an entity), that means I need to provide logic for 640 squares.
 // that's way too many to do manually... Instead... I'll build a couple of default 768 * 600 views. And then splice 24 of those together for a game map. In order to increase difficulty, I'll use Math.random to throw in a random number of enemies.
 
+const rotate = (array, count) => {
+  while(count>0){
+    let temp = array.shift();
+    array.push(temp);
+    count--;
+  }
+  return array;
+};
+
 const One = () => {
-  let screenorder = [screen_one, screen_two, screen_three, screen_four, screen_five, screen_six, screen_seven];
+  let screenorder = [screen_two, screen_three, screen_four, screen_five, screen_six, screen_seven];
+  screenorder = rotate(screenorder, Math.floor(Math.random()*6));
+  screenorder.unshift(screen_one);
   return screenorder;
 };
 /* harmony export (immutable) */ __webpack_exports__["a"] = One;
@@ -1179,7 +1339,7 @@ const One = () => {
 const screen_one=[
 ".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. SI .. .. .. CH .. .. CH CA CH .. CH LU CH .. CH .. CH .. CH .. .. LU .. .. LU .. .. .. ..",
+".. .. SI .. .. .. CH .. .. CH CA CH .. CH .. CH .. CH .. CH .. CH .. LU .. .. .. .. .. LU .. ..",
 "GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
@@ -1190,7 +1350,7 @@ const screen_two=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH LU CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH LU CH LU CH .. CH .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. CA CA .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
@@ -1212,7 +1372,7 @@ const screen_three=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. LU .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. CH .. .. CA BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH .. .. ..",
 ".. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
@@ -1232,26 +1392,25 @@ const screen_four=[
 ".. .. .. .. .. .. FL FM FM FM FM FR FM .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. LU .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR RG .. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG .. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
 const screen_five=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX .. CA .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. LU .. .. .. .. .. .. .. .. .. .. BX .. CA .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. LU .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. BX BX BX BX LU .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX BX .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. CH CH CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. CA .. .. .. .. .. .. BX BX BX BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. LU CH CH CH CH .. .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. ..",
+".. CA .. .. .. .. .. .. BX BX BX BX BX BX BX .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 "UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .."];
 
@@ -1266,10 +1425,10 @@ const screen_six=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. LY CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. LU .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. LY .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
@@ -1284,7 +1443,7 @@ const screen_six=[
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
 const screen_seven=[
-".. .. .. .. .. .. .. .. CH CH .. .. .. CA CA .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. CH CH .. .. .. CA CA .. .. .. CH CH .. LU .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. CH CH .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
@@ -1376,7 +1535,7 @@ class Lucha extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
     this.currentState = this.states.walking;
     this.direction = "left";
     this.velY = 0;
-    this.velX = 2;
+    this.velX = 2.4;
     this.chips = 0;
     this.x = x;
     this.y = y-34;
