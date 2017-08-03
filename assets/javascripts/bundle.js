@@ -110,10 +110,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_render__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_movement__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__entities_entities__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__map_map_creator__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_levels__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_levels___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__map_levels__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_animation__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_entities__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_map_creator__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__map_levels__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__map_levels___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__map_levels__);
+
 
 
 
@@ -154,7 +156,7 @@ class Game {
     ];
 
     let spriteSheet = new Image();
-    spriteSheet.src = "img/sprite_sheet2.png";
+    spriteSheet.src = "img/sprite_sheet3.png";
 
     let tileSet = new Image();
     tileSet.src = "img/tileset.svg";
@@ -174,7 +176,7 @@ class Game {
 
       let data = {
         animationFrame: 0,
-        mapCreator: new __WEBPACK_IMPORTED_MODULE_5__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_6__map_levels__["one"], tileSet, spriteSheet),
+        mapCreator: new __WEBPACK_IMPORTED_MODULE_6__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_7__map_levels__["one"], tileSet, spriteSheet),
         spriteSheet,
         entities: {},
         tileSet,
@@ -196,29 +198,30 @@ class Game {
       audio.play();
       //
       __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].init(data);
-      __WEBPACK_IMPORTED_MODULE_4__entities_entities__["a" /* default */].init(data);
+      __WEBPACK_IMPORTED_MODULE_5__entities_entities__["a" /* default */].init(data);
       __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].init(data);
       this.run(data);
     });
   }
 
-  run(data){
+  run (data){
     const loop = () => {
       // TODO: write game.updateview (to sidesscroll the viewport)
       // get input from user
       __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].update(data);
       // animate character
-      Game.update(data);
+      this.update(data);
       __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].update(data);
       // every time the loop runs, add a tick to the animation frame.
-      data.aniationFrame++;
+      data.animationFrame++;
+
       window.requestAnimationFrame(loop);
     };
     loop();
   }
 
   update(data){
-    Animation.update(data);
+    __WEBPACK_IMPORTED_MODULE_4__util_animation__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_2__util_movement__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_3__util_physics__["a" /* default */].update(data);
   }
@@ -285,6 +288,7 @@ const Input = {
     },
 
     isPressed(code) {
+      // these helpers are basic methods that tell us what key is pressed.
       if (Input.helpers.pressed[code]) {
         return false;
       } else if (Input.helpers.down[code]) {
@@ -316,7 +320,7 @@ const Render = {
   update: data=>{
     // we clear the WHOLE screen every time.( we could just do part)
     data.canvas.fgCtx.clearRect(0, 0, data.canvas.fgCanvas.width, data.canvas.fgCanvas.height);
-    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx);
+    // Render.helpers.drawText(data.entities.score, data.canvas.fgCtx);
 
     // make sure the second argument is WHERE i want to draw him
     Render.helpers.drawEntity(data.entities.nacho, data.canvas.fgCtx);
@@ -330,7 +334,6 @@ const Render = {
     // now when we call image, we can just call drawEntity, and the image will be drawn.
     drawEntity: (entity, ctx)=>{
       // we set the sprite, and the source x,
-
       ctx.drawImage(entity.sprite.img,
                 entity.sprite.srcX, entity.sprite.srcY,
                 entity.sprite.srcW, entity.sprite.srcH,
@@ -355,13 +358,13 @@ const Render = {
 
 "use strict";
 const Movement = {
-  update: function (data) {
-        Movement.nacho(data);
-    },
+  update: data => {
+    nacho(data);
+  },
+};
 
-    nacho: function (data) {
-        data.entities.nacho.currentState.movement(data);
-    }
+const nacho = data => {
+  data.entities.nacho.currentState.movement(data);
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (Movement);
@@ -454,14 +457,43 @@ const Physics = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__nacho__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__background__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__sprite__ = __webpack_require__(1);
-// import Chip from "./chip";
+const Animation = {
+  update: data => {
+    nacho(data);
+    chips(data);
+  },
+};
+
+const nacho = data => {
+  data.entities.nacho.currentState.animation(data);
+};
+
+const chips = data => {
+  data.entities.chipsArray.forEach((chip)=>{
+    chip.currentState.animation(data);
+  });
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (Animation);
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__chip__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__nacho__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__walls__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__background__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__score__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__sprite__ = __webpack_require__(1);
+
 // import Corn from "./corn";
 
 
-// import Score from "./score";
+
+
 
 
 // this class contains and initializes ALL of the entities for the game.
@@ -469,14 +501,34 @@ const Entities = {
 
   init(data){
 
-    let bgSprite = new __WEBPACK_IMPORTED_MODULE_2__sprite__["a" /* default */](data.tileSet, 72, 288, 432, 324);
-    let background = new __WEBPACK_IMPORTED_MODULE_1__background__["a" /* default */]("bg", bgSprite, 0, 0, 768, 600);
+    let bgSprite = new __WEBPACK_IMPORTED_MODULE_5__sprite__["a" /* default */](data.tileSet, 72, 288, 432, 324);
+    let background = new __WEBPACK_IMPORTED_MODULE_3__background__["a" /* default */]("bg", bgSprite, 0, 0, 768, 600);
 
-    let nachoSprite = new __WEBPACK_IMPORTED_MODULE_2__sprite__["a" /* default */](data.tileSet, 0, 0, 24, 24);
-    let nacho = new __WEBPACK_IMPORTED_MODULE_0__nacho__["a" /* default */]("nacho", nachoSprite, 40, 10, 64, 64);
+    let nacho = new __WEBPACK_IMPORTED_MODULE_1__nacho__["a" /* default */]("nacho", data.spriteSheet, 40, 10, 64, 64);
+
+    let wallLocations = [[0, 0, 4, 600], [0, 500, 768, 150],
+                      [225, 365, 336, 216], [767, 0, 4, 600]];
+
+    let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(290, 70);
+
+    let chipLocations = [[269, 120], [317, 120], [365, 120], [413, 120], [461, 120],
+                             [221, 210], [269, 210], [317, 210], [365, 210], [413, 210], [461, 210], [509, 210],
+                             [221, 300], [269, 300], [317, 300], [365, 300], [413, 300], [461, 300], [509, 300]];
 
     data.entities.background = background;
     data.entities.nacho = nacho;
+    data.entities.chipsArray = [];
+    data.entities.wallsArray = [];
+     data.entities.score = score;
+
+  // loop through locations to create a new coin for each location element
+    chipLocations.forEach(function (location) {
+      data.entities.chipsArray.push(new __WEBPACK_IMPORTED_MODULE_0__chip__["a" /* default */]("chip", data.spriteSheet, location[0], location[1], 30, 42));
+    });
+
+    wallLocations.forEach(function (location) {
+      data.entities.wallsArray.push(Object(__WEBPACK_IMPORTED_MODULE_2__walls__["a" /* default */])(location[0], location[1], location[2], location[3]));
+    });
   }
 };
 
@@ -484,7 +536,64 @@ const Entities = {
 
 
 /***/ }),
-/* 8 */
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(1);
+
+
+
+class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
+  constructor(type, spritesheet, x, y, w, h){
+
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23);
+
+    super(type, sprite, x, y, w, h);
+
+    this.sound = new Audio("audio/supernacho_chip.mp3");
+
+    this.spriteAnimations = {
+      spin: {
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 31, 23),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 31, 23),
+                ],
+        currentFrame: 0
+      }
+    };
+
+    let self = this;
+
+    this.states = {
+      spinning: {
+        animation: data => {
+          if (data.animationFrame % 13 === 0) {
+            // console.log("self: ", self);
+            self.sprite = self.spriteAnimations.spin.frames[self.spriteAnimations.spin.currentFrame];
+            self.spriteAnimations.spin.currentFrame++;
+
+            if (self.spriteAnimations.spin.currentFrame > 2) {
+              self.spriteAnimations.spin.currentFrame = 0;
+            }
+          }
+        }
+      }
+    };
+    this.currentState = self.states.spinning;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Chip;
+
+
+
+/***/ }),
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -495,31 +604,33 @@ const Entities = {
 
 class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
 
-  constructor(type, img, x, y, w, h){
+  constructor(type, spritesheet, x, y, w, h){
 
-    super(type, img, x, y, w, h);
-    this.img = img;
+    let sprite = new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24);
+
+    super(type, sprite, x, y, w, h);
 
     this.jumpSound = new Audio("audio/supernacho_jump.mp3");
+
     this.spriteAnimations = {
       walkRight: {
-        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 24, 0, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 48, 0, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 72, 0, 24, 24)],
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 24, 0, 24, 24),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 48, 0, 24, 24),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 0, 24, 24)],
         currentFrame: 0
       },
       walkLeft: {
-          frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 51, 26, 24, 24),
-                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 26, 25, 24, 24),
-                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 0, 26, 24, 24)],
+          frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 51, 26, 24, 24),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 26, 25, 24, 24),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 26, 24, 24)],
           currentFrame: 0
       },
-      standRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 0, 0, 24, 24),
-      standLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 75, 27, 24, 24),
-      jumpLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 99, 25, 24, 24),
-      jumpRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](img, 98, 0, 28, 24)
+      standRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24),
+      standLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 75, 27, 24, 24),
+      jumpLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 99, 25, 24, 24),
+      jumpRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 98, 0, 28, 24)
     };
-
+    let self = this;
     this.states = {
       // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
       jumping: {
@@ -533,9 +644,9 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
         },
         animation: data => {
           if (this.direction === "right") {
-              this.sprite = this.spriteAnimations.jumpRight;
+            this.sprite = self.spriteAnimations.jumpRight;
           } else {
-              this.sprite = this.spriteAnimations.jumpLeft;
+            this.sprite = self.spriteAnimations.jumpLeft;
           }
         }
       },
@@ -545,37 +656,37 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
         },
         animation: function(data){
           if (this.direction === "right") {
-              this.sprite = this.spriteAnimations.standRight;
+            this.sprite = self.spriteAnimations.standRight;
           } else {
-              this.sprite = this.spriteAnimations.standLeft;
+            this.sprite = self.spriteAnimations.standLeft;
           }
         }
       },
       walking: {
         movement: data => {
           if (this.direction === "right") {
-              this.x += this.velX;
+            this.x += this.velX;
           } else {
-              this.x -= this.velX;
+            this.x -= this.velX;
           }
         },
         animation: data => {
           if (this.direction === "right") {
             if (data.animationFrame % 5 === 0) {
-              this.sprite = this.spriteAnimations.walkRight.frames[this.spriteAnimations.walkRight.currentFrame];
-              this.spriteAnimations.walkRight.currentFrame++;
+              this.sprite = self.spriteAnimations.walkRight.frames[self.spriteAnimations.walkRight.currentFrame];
+              self.spriteAnimations.walkRight.currentFrame++;
 
-              if (this.spriteAnimations.walkRight.currentFrame > 2) {
-                this.spriteAnimations.walkRight.currentFrame = 0;
+              if (self.spriteAnimations.walkRight.currentFrame > 2) {
+                self.spriteAnimations.walkRight.currentFrame = 0;
               }
             }
           } else {
             if (data.animationFrame % 5 === 0) {
-              this.sprite = this.spriteAnimations.walkLeft.frames[this.spriteAnimations.walkLeft.currentFrame];
-              this.spriteAnimations.walkLeft.currentFrame++;
+              this.sprite = self.spriteAnimations.walkLeft.frames[self.spriteAnimations.walkLeft.currentFrame];
+              self.spriteAnimations.walkLeft.currentFrame++;
 
-              if (this.spriteAnimations.walkLeft.currentFrame > 2) {
-                this.spriteAnimations.walkLeft.currentFrame = 0;
+              if (self.spriteAnimations.walkLeft.currentFrame > 2) {
+                self.spriteAnimations.walkLeft.currentFrame = 0;
               }
             }
           }
@@ -599,7 +710,23 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
 
 
 /***/ }),
-/* 9 */
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const Wall = (x, y, w, h) => ({
+    type: "wall",
+    x,
+    y,
+    w,
+    h
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (Wall);
+
+
+/***/ }),
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -613,7 +740,24 @@ class Background extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */
 
 
 /***/ }),
-/* 10 */
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const Score = (x, y) => ({
+  value: 0,
+  size: "25px",
+  font: "PixelEmulator",
+  color: "white",
+  x,
+  y
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (Score);
+
+
+/***/ }),
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -630,7 +774,7 @@ class Map{
 
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports) {
 
 
