@@ -144,15 +144,14 @@ class Game {
     const viewport = {
       width: 760,
       height: 600,
-      vX: 1,
+      vX: 1.3,
       vY: 0,
     };
 
-    let audio = new Audio();
-    let backgroundMusic = [
-      "audio/Manteca.m4a",
-      "audio/Desafinado.m4a"
-    ];
+
+    // sound files are costly. to save loading time, instead of having a playlist, just have one song.
+
+    let backgroundMusic = new Audio("audio/Desafinado.m4a");
 
     let spriteSheet = new Image();
     spriteSheet.src = "img/sprite_sheet3.png";
@@ -160,48 +159,38 @@ class Game {
     let tileSet = new Image();
     tileSet.src = "img/tileset.svg";
 
-
     document.getElementById('mute-sound').addEventListener('click', (e) => {
-      if(audio.muted){
-        audio.muted = false;
+      if(backgroundMusic.muted){
+        backgroundMusic.muted = false;
       } else {
-        audio.muted = true;
+        backgroundMusic.muted = true;
       }
     });
+
+    backgroundMusic.play();
+    const totalResources = 0;
 
     // add a listener to wait until spritesheet is loaded.
     spriteSheet.addEventListener("load", ()=>{
       // once it's loaded, then we can run the spritesheet.
+      tileSet.addEventListener("load", ()=>{
+        let data = {
+          animationFrame: 0,
+          mapCreator: new __WEBPACK_IMPORTED_MODULE_6__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_7__map_levels__["a" /* One */](), tileSet, spriteSheet),
+          tileSet,
+          spriteSheet,
+          entities: {},
+          canvas,
+          viewport
+        };
 
-      let data = {
-        animationFrame: 0,
-        mapCreator: new __WEBPACK_IMPORTED_MODULE_6__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_7__map_levels__["a" /* One */](), tileSet, spriteSheet),
-        spriteSheet,
-        entities: {},
-        tileSet,
-        canvas,
-        viewport
-      };
-
-      let i = 0;
-      audio.addEventListener('ended', function () {
-        // when one song ends, play the next song in the playlist or loop back to the beginning.
-          i = i++ < backgroundMusic.length ? i : 0;
-          audio.src = backgroundMusic[i];
-          audio.play();
-      }, true);
-
-      audio.volume = i===0 ? 0.3 : 0.5;
-      audio.loop = false;
-      audio.src = backgroundMusic[0];
-      audio.play();
-      //
-      __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].init(data);
-      __WEBPACK_IMPORTED_MODULE_5__entities_entities__["a" /* default */].init(data);
-      __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].init(data);
-      this.run(data);
-    });
-  }
+        __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].init(data);
+        __WEBPACK_IMPORTED_MODULE_5__entities_entities__["a" /* default */].init(data);
+        __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].init(data);
+        this.run(data);
+      });
+  });
+}
 
   run (data){
     const loop = () => {
@@ -228,7 +217,6 @@ class Game {
   }
 
   updateViewPort(data){
-    console.log(data.entities);
     data.viewport.vX++;
   }
 
@@ -320,9 +308,9 @@ const Input = {
 const Render = {
   init: data =>{
     data.entities.map= [];
-    data.entities.bg = [];
     data.entities.chipsArray = data.entities.chipsArray || [];
     data.mapCreator.create(data);
+    Render.helpers.drawBackground(data.entities.background, data.canvas.bgCtx);
   },
 
   // we draw chips on update method because we need to re render any time our character runs through a chip. (dynamic update necessary)
@@ -359,7 +347,7 @@ const Render = {
           entity.sprite.img,
           entity.sprite.srcX, entity.sprite.srcY,
           entity.sprite.srcW, entity.sprite.srcH,
-          entity.x, entity.y,
+          entity.x - viewport.vX, entity.y - viewport.vY,
           entity.w, entity.h);
         }
       },
@@ -368,8 +356,17 @@ const Render = {
       ctx.font = text.size + " " + text.font;
       ctx.fillStyle = text.color;
       ctx.fillText("Chips:" + " " + text.value, text.x, text.y);
+    },
+
+    drawBackground: (entity, ctx)=>{
+      ctx.drawImage(
+        entity.sprite.img,
+        entity.sprite.srcX, entity.sprite.srcY,
+        entity.sprite.srcW, entity.sprite.srcH,
+        entity.x, entity.y,
+        entity.w, entity.h);
+      }
     }
-  }
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (Render);
@@ -422,9 +419,9 @@ const Physics = {
       entityCollisionCheck(element);
     });
 
-    data.entities.wallsArray.forEach(function (wall) {
-      entityCollisionCheck(wall);
-    });
+    // data.entities.wallsArray.forEach(function (wall) {
+    //   entityCollisionCheck(wall);
+    // });
 
     data.entities.chipsArray.forEach(function(chip){
       entityCollisionCheck(chip);
@@ -434,7 +431,7 @@ const Physics = {
     handleCollision: function (data, entity) {
       let nacho = data.entities.nacho;
 
-      if (["wall", "gound", "underground", "rightcorner", "leftcorner", "box", "floatleft", "floatright", "floatmiddle"].includes(entity.type)){
+      if (["wall", "ground", "underground", "rightcorner", "leftcorner", "box", "floatleft", "floatright", "floatmiddle"].includes(entity.type)){
         //Left Side Wall Collision
         if (nacho.x < entity.x && nacho.y >= entity.y) {
           nacho.x = entity.x - nacho.w;
@@ -528,12 +525,11 @@ const Entities = {
 
   init(data){
 
-    let bgSprite = new __WEBPACK_IMPORTED_MODULE_5__sprite__["a" /* default */](data.tileSet, 72, 288, 432, 324);
-    let background = new __WEBPACK_IMPORTED_MODULE_3__background__["a" /* default */]("bg", bgSprite, 0, 0, 768, 600);
+    let background = new __WEBPACK_IMPORTED_MODULE_3__background__["a" /* default */]("bg", data.tileSet, 0, 0, 768, 600);
 
     let nacho = new __WEBPACK_IMPORTED_MODULE_1__nacho__["a" /* default */]("nacho", data.spriteSheet, 40, 10, 64, 64);
 
-    let wallLocations = [[0, 0, 4, 600], [767, 0, 4, 600]];
+    // let wallLocations = [[data.viewport.vX, 0, 4, 600], [767+data.viewport.vX, 0, 4, 600]];
 
     let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(290, 70);
 
@@ -543,7 +539,7 @@ const Entities = {
 
     data.entities.background = background;
     data.entities.nacho = nacho;
-    data.entities.wallsArray = [];
+    // data.entities.wallsArray = [];
     data.entities.score = score;
     data.entities.chipsArray = data.entities.chipsArray || [];
 
@@ -552,9 +548,9 @@ const Entities = {
       data.entities.chipsArray.push(new __WEBPACK_IMPORTED_MODULE_0__chip__["a" /* default */]("chip", data.spriteSheet, location[0], location[1], 30, 42));
     });
 
-    wallLocations.forEach(function (location) {
-      data.entities.wallsArray.push(Object(__WEBPACK_IMPORTED_MODULE_2__walls__["a" /* default */])(location[0], location[1], location[2], location[3]));
-    });
+    // wallLocations.forEach(function (location) {
+      // data.entities.wallsArray.push(Wall(location[0], location[1], location[2], location[3]));
+    // });
   }
 };
 
@@ -582,9 +578,9 @@ class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
 
     this.spriteAnimations = {
       spin: {
-        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 24, 24),
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 31, 23),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 172, 22, 31, 23),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 204, 22, 31, 23),
                 ],
         currentFrame: 0
       }
@@ -661,12 +657,14 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
       // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
       jumping: {
         movement: data => {
-          if (this.velY === 0) {
+          if(this.velY === 0){
             var jumpSound = this.jumpSound.cloneNode();
             jumpSound.volume = 0.3;
             jumpSound.play();
-            this.velY -= 23;
+            this.velY = -23;
+            this.y += this.velY;
           }
+
         },
         animation: data => {
           if (this.direction === "right") {
@@ -748,7 +746,7 @@ const Wall = (x, y, w, h) => ({
     h
 });
 
-/* harmony default export */ __webpack_exports__["a"] = (Wall);
+/* unused harmony default export */ var _unused_webpack_default_export = (Wall);
 
 
 /***/ }),
@@ -763,9 +761,10 @@ const Wall = (x, y, w, h) => ({
 
 class Background extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
   constructor(type, spritesheet, x, y){
-    let w = 24;
-    let h = 24;
-    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 216, 72, 72, 72);
+    let w = 768;
+    let h = 600;
+
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 288, 432, 324);
 
     super(type, sprite, x, y, w, h);
   }
@@ -783,7 +782,7 @@ const Score = (x, y) => ({
   value: 0,
   size: "25px",
   font: "PixelEmulator",
-  color: "white",
+  color: "red",
   x,
   y
 });
@@ -819,7 +818,7 @@ class Map{
     this.spritesheet = spritesheet;
 
     this.mapElements = [];
-    this.bgElements = [];
+
     this.chips = [];
 
     this.level.forEach((screen, i) => {
@@ -829,8 +828,6 @@ class Map{
       screen.reverse().forEach((row, j) =>{
         let xScreenStart = i*768;
 
-        let bgSprite = new __WEBPACK_IMPORTED_MODULE_6__entities_sprite__["a" /* default */](this.tileSet, 72, 288, 432, 324);
-        this.bgElements.push("background", bgSprite, 0, 0, 768, 600);
         // each entity is 24 pixels tall. 600/24 equals 24. So the starting 6 position of each entity will be calculated as follows:
         let yPos = (24-j)*24;
         row.split(" ").forEach((el, idx)=>{
@@ -909,7 +906,7 @@ class Map{
 
   createChip(x, y){
     this.chips.push(
-      new __WEBPACK_IMPORTED_MODULE_1__entities_chip__["a" /* default */]("chip", this.spritesheet, x, y, 24, 24)
+      new __WEBPACK_IMPORTED_MODULE_1__entities_chip__["a" /* default */]("chip", this.spritesheet, x, y-30, 30, 42)
     );
   }
 
@@ -947,37 +944,25 @@ class Map{
     this.mapElements.forEach((element) =>{
       data.entities.map.push(element);
     });
-    this.bgElements.forEach((element) =>{
-      data.entities.map.push(element);
-    });
-    data.entities.chipsArray.concat(this.chips);
+    data.entities.chipsArray = data.entities.chipsArray.concat(this.chips);
   }
 
   renderMap(data){
     this.mapElements.forEach((element) =>{
       this.drawEntity(element, data);
     });
-    this.bgElements.forEach((element) => {
-      this.drawEntity(element, data);
-    });
-    this.chips.forEach((chip) => {
-      this.drawEntity(chip, data);
-    });
   }
 
   drawEntity(entity, data){
-    const ctx = data.canvas.fgCtx;
-    if(entity.type === "background"){
-      ctx= data.canvas.bgCtx;
-    }
     const viewport = data.viewport;
+    const ctx = data.canvas.fgCtx;
 
-    if(((entity.x + entity.w >= viewport.vX && entity.x + entity.w <= viewport.vX + viewport.width)) && ((entity.y + entity.h >= viewport.vY && entity.y + entity.h <= viewport.vY + viewport.height))){
+    if(((entity.x + entity.w >= viewport.vX && entity.x <= viewport.vX + viewport.width)) && ((entity.y + entity.h >= viewport.vY && entity.y + entity.h <= viewport.vY + viewport.height))){
       ctx.drawImage(
         entity.sprite.img,
         entity.sprite.srcX, entity.sprite.srcY,
         entity.sprite.srcW, entity.sprite.srcH,
-        entity.x, entity.y,
+        entity.x - viewport.vX, entity.y - viewport.vY,
         entity.w, entity.h);
     }
   }
@@ -1005,7 +990,7 @@ const One = () => {
 
 const screen_one=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. SI .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. SI .. .. .. .. .. .. CH CA CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
@@ -1144,7 +1129,7 @@ const screen_seven=[
 class Ground extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
   constructor(type, spritesheet, x, y){
     let w = 24;
-    let h = 24;
+    let h = 35;
     let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 216, 72, 72, 72);
 
     super(type, sprite, x, y, w, h);
@@ -1158,7 +1143,7 @@ class Underground extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default *
   constructor(type, spritesheet, x, y){
     let w = 24;
     let h = 24;
-    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 504,  180, 72, 72);
+    let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 504,  180, 71, 71);
 
     super(type, sprite, x, y, w, h);
 
@@ -1195,11 +1180,11 @@ class LeftCorner extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */
 
 class Cactus extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
   constructor(type, spritesheet, x, y){
-    let w = 24;
-    let h = 24;
+    let w = 54;
+    let h = 64;
     let sprite =  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 648, 180, 72, 72);
 
-    super(type, sprite, x, y, w, h);
+    super(type, sprite, x-20, y-40, w, h);
 
   }
 }
