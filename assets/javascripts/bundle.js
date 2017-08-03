@@ -117,8 +117,6 @@ class Chip extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]{
 
     super(type, sprite, x, y, w, h);
 
-    this.sound = new Audio("audio/supernacho_chip.mp3");
-
     this.spriteAnimations = {
       spin: {
         frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 140, 22, 31, 23),
@@ -175,8 +173,6 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
 
     super(type, sprite, x, y, w, h);
 
-    this.jumpSound = new Audio("audio/supernacho_jump.mp3");
-
     this.spriteAnimations = {
       walkRight: {
         frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 24, 0, 24, 24),
@@ -201,13 +197,12 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
       jumping: {
         movement: data => {
           if(this.velY === 0){
-            var jumpSound = this.jumpSound.cloneNode();
+            let jumpSound = data.sounds.jumpSound.cloneNode();
             jumpSound.volume = 0.3;
             jumpSound.play();
             this.velY = -23;
             this.y += this.velY;
           }
-
         },
         animation: data => {
           if (this.direction === "right") {
@@ -343,6 +338,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util_render__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util_movement__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util_physics___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__util_physics__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__util_animation__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_entities__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__map_map_creator__ = __webpack_require__(15);
@@ -385,6 +381,7 @@ class Game {
     // sound files are costly. to save loading time, instead of having a playlist, just have one song.
 
     let backgroundMusic = new Audio("audio/Desafinado.m4a");
+    // problem with audio tags -- they don't play well if they have to load every tine.
 
     let spriteSheet = new Image();
     spriteSheet.src = "img/sprite_sheet3.png";
@@ -403,6 +400,13 @@ class Game {
     backgroundMusic.play();
     const totalResources = 0;
 
+    // this variable is used in the ninjastar method along with a set timeout to space out firing of ninjastars.
+    const canFire = true;
+    // keeps track of the number of ninjastars we have;
+
+
+
+    let ninjasound =
     // add a listener to wait until spritesheet is loaded.
     spriteSheet.addEventListener("load", ()=>{
       // once it's loaded, then we can run the spritesheet.
@@ -410,11 +414,18 @@ class Game {
         let data = {
           animationFrame: 0,
           mapCreator: new __WEBPACK_IMPORTED_MODULE_6__map_map_creator__["a" /* default */](__WEBPACK_IMPORTED_MODULE_7__map_levels__["a" /* One */](), tileSet, spriteSheet),
+          canFire,
           tileSet,
           spriteSheet,
           entities: {},
           canvas,
-          viewport
+          viewport,
+          sounds: {
+            backgroundMusic,
+            ninjaSound: new Audio("audio/pitch.mp3"),
+            jumpSound: new Audio("audio/supernacho_jump.mp3"),
+            chipSound: new Audio("audio/supernacho_chip.mp3")
+          }
         };
 
         __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].init(data);
@@ -446,7 +457,7 @@ class Game {
   update(data){
     __WEBPACK_IMPORTED_MODULE_4__util_animation__["a" /* default */].update(data);
     __WEBPACK_IMPORTED_MODULE_2__util_movement__["a" /* default */].update(data);
-    __WEBPACK_IMPORTED_MODULE_3__util_physics__["a" /* default */].update(data);
+    __WEBPACK_IMPORTED_MODULE_3__util_physics__["default"].update(data);
   }
 
   updateViewPort(data){
@@ -513,7 +524,12 @@ const Input = {
 
     // Spacebar
     if (Input.helpers.isDown(32)) {
-      Object(__WEBPACK_IMPORTED_MODULE_0__entities_ninja_star__["a" /* default */])(data, nacho.x+20, nacho.y+5);
+      if(data.canFire && data.entities.starCounter.value >0){
+        Object(__WEBPACK_IMPORTED_MODULE_0__entities_ninja_star__["a" /* default */])(data, nacho.x+20, nacho.y+5);
+        data.canFire = false;
+        // using a time out to space out firing of ninjastars
+        setTimeout(()=>{data.canFire = true;}, 300);
+      }
     }
   },
 
@@ -560,8 +576,6 @@ class NinjaStar extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]
 
     super(type, sprite, x, y, w, h);
 
-    this.sound = new Audio("audio/pitch.mp3");
-
     this.velX = -9;
     // if nacho is facing left, the ninjastar will fly left instead of right
     if(data.entities.nacho.direction === "left"){
@@ -576,8 +590,11 @@ class NinjaStar extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */]
 }
 
 const FireStar = (data, x, y) => {
-  console.log("Is this getting hit?");
   let ninjastar = new NinjaStar("ninjastar", data, x, y);
+  data.entities.starCounter.value -=1;
+  var ninjaSound = data.sounds.ninjaSound.cloneNode();
+  ninjaSound.volume = 0.3;
+  ninjaSound.play();
   data.entities.ninjastars.push(ninjastar);
 };
 /* unused harmony export FireStar */
@@ -606,7 +623,8 @@ const Render = {
 
     data.mapCreator.renderMap(data);
 
-    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx);
+    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx, "score");
+    Render.helpers.drawText(data.entities.starCounter, data.canvas.fgCtx, "chips");
 
     // only draw elements that are in the viewport:
 
@@ -618,6 +636,11 @@ const Render = {
 
     data.entities.ninjastars.forEach((star)=>{
       Render.helpers.drawEntity(star, data);
+    });
+
+    console.log(data.entities.luchaArray);
+    data.entities.luchaArray.forEach((lucha)=>{
+      Render.helpers.drawEntity(lucha, data);
     });
   },
 
@@ -642,10 +665,10 @@ const Render = {
         }
       },
 
-    drawText: (text, ctx)=>{
+    drawText: (text, ctx, category)=>{
       ctx.font = text.size + " " + text.font;
       ctx.fillStyle = text.color;
-      ctx.fillText("Chips:" + " " + text.value, text.x, text.y);
+      ctx.fillText(category + " " + text.value, text.x, text.y);
     },
 
     drawBackground: (entity, ctx)=>{
@@ -671,11 +694,18 @@ const Movement = {
   update: data => {
     nacho(data);
     ninjastar(data);
+    luchas(data);
   },
 };
 
 const nacho = data => {
   data.entities.nacho.currentState.movement(data);
+};
+
+const luchas = data => {
+  data.entities.luchaArray.forEach(lucha=>{
+    lucha.currentState.movement(data);
+  });
 };
 
 const ninjastar = data => {
@@ -693,89 +723,10 @@ const ninjastar = data => {
 
 /***/ }),
 /* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, __webpack_exports__) {
 
 "use strict";
-const Physics = {
-  update: function(data){
-    Physics.helpers.gravity(data.entities.nacho);
-    Physics.collisionDetection(data);
-  },
-
-  collisionDetection: function (data) {
-    let nacho = data.entities.nacho;
-
-    let entityCollisionCheck = function (entity) {
-      // check to see if nacho image intersects with the entity image.
-      if (nacho.x < entity.x + entity.w &&
-        nacho.x + nacho.w > entity.x &&
-        nacho.y < entity.y + entity.h &&
-        nacho.h + nacho.y > entity.y) {
-        //Collision Occured
-        Physics.handleCollision(data, entity);
-      }
-    };
-
-    data.entities.map.forEach(function(element){
-      entityCollisionCheck(element);
-    });
-
-    // data.entities.wallsArray.forEach(function (wall) {
-    //   entityCollisionCheck(wall);
-    // });
-
-    data.entities.chipsArray.forEach(function(chip){
-      entityCollisionCheck(chip);
-    });
-  },
-
-    handleCollision: function (data, entity) {
-      let nacho = data.entities.nacho;
-
-      if (["wall", "ground", "underground", "rightcorner", "leftcorner", "box", "floatleft", "floatright", "floatmiddle"].includes(entity.type)){
-        //Left Side Wall Collision
-        if (nacho.x < entity.x && nacho.y >= entity.y) {
-          nacho.x = entity.x - nacho.w;
-        }
-
-        //Right Side Wall Collision
-        if (nacho.x > entity.x && nacho.y >= entity.y) {
-          nacho.x = entity.x + entity.w;
-        }
-
-        //Top of Wall Collision
-        if (nacho.y < entity.y && (nacho.x + nacho.w) > entity.x + 10 &&
-          nacho.x < (entity.x + entity.w) - 10 && nacho.velY >= 0) {
-         nacho.currentState = nacho.states.standing;
-          nacho.y = entity.y - nacho.h;
-          nacho.velY = 0;
-        }
-      }
-
-      if (entity.type === "chip") {
-        let chipsArray = data.entities.chipsArray;
-        let chipSound = entity.sound.cloneNode();
-        let index = chipsArray.indexOf(entity);
-
-        data.entities.score.value += 1;
-
-        chipSound.play();
-        chipsArray.splice(index, 1);
-      }
-    },
-
-  helpers: {
-    gravity: function(entity){
-      // this will give us acceleration downwards
-      entity.velY += 1.2;
-      entity.y += entity.velY;
-    }
-  }
-
-};
-
-/* harmony default export */ __webpack_exports__["a"] = (Physics);
-
+throw new Error("Module parse failed: /Users/noahkang/Documents/AppAcademy/SuperNacho/lib/util/physics.js Unexpected token (40:54)\nYou may need an appropriate loader to handle this file type.\n|   },\n| \n|     handleCollision: function (data, entity, character:\n| \n|       if ([\"wall\", \"ground\", \"underground\", \"rightcorner\", \"leftcorner\", \"box\", \"floatleft\", \"floatright\", \"floatmiddle\", \"lucha\"].includes(entity.type)){");
 
 /***/ }),
 /* 13 */
@@ -786,6 +737,7 @@ const Animation = {
   update: data => {
     nacho(data);
     chips(data);
+    luchas(data);
   },
 };
 
@@ -796,6 +748,12 @@ const nacho = data => {
 const chips = data => {
   data.entities.chipsArray.forEach((chip)=>{
     chip.currentState.animation(data);
+  });
+};
+
+const luchas = data => {
+  data.entities.luchaArray.forEach((lucha)=>{
+    lucha.currentState.animation(data);
   });
 };
 
@@ -832,7 +790,8 @@ const Entities = {
 
     // let wallLocations = [[data.viewport.vX, 0, 4, 600], [767+data.viewport.vX, 0, 4, 600]];
 
-    let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(290, 70);
+    let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(220, 70);
+    let starCounter = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(340, 70);
 
     let chipLocations = [[269, 120], [317, 120], [365, 120], [413, 120], [461, 120],
                              [221, 210], [269, 210], [317, 210], [365, 210], [413, 210], [461, 210], [509, 210],
@@ -844,6 +803,7 @@ const Entities = {
     data.entities.nacho = nacho;
     // data.entities.wallsArray = [];
     data.entities.score = score;
+    data.entities.starCounter = starCounter;
     data.entities.ninjastars = ninjastars;
     data.entities.chipsArray = data.entities.chipsArray || [];
 
@@ -871,11 +831,13 @@ const Entities = {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__entities_nacho__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__entities_walls__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__entities_background__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_score__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__entities_sprite__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__entities_lucha__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__entities_score__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__entities_sprite__ = __webpack_require__(0);
 
 
 // import Corn from "./corn";
+
 
 
 
@@ -887,6 +849,7 @@ class Map{
     this.level = level;
     this.tileset = tileset;
     this.spritesheet = spritesheet;
+    this.luchaArray = [];
 
     this.mapElements = [];
 
@@ -936,6 +899,9 @@ class Map{
               break;
             case "FM":
               this.createFloatMiddle(xPos, yPos);
+              break;
+            case "LU":
+              this.createLucha(xPos, yPos);
               break;
             default:
               break;
@@ -1011,11 +977,21 @@ class Map{
     );
   }
 
+  createLucha(x, y){
+    this.luchaArray.push(
+      new __WEBPACK_IMPORTED_MODULE_5__entities_lucha__["a" /* default */]("lucha", this.spritesheet, x, y)
+    );
+  }
+
   create(data){
+    console.log("luchas", this.luchaArray);
     this.mapElements.forEach((element) =>{
       data.entities.map.push(element);
     });
     data.entities.chipsArray = data.entities.chipsArray.concat(this.chips);
+
+    data.entities.luchaArray = data.entities.luchArray || [];
+    data.entities.luchaArray = this.luchaArray;
   }
 
   renderMap(data){
@@ -1203,7 +1179,7 @@ const One = () => {
 const screen_one=[
 ".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. SI .. .. .. CH .. .. CH CA CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. SI .. .. .. CH .. .. CH CA CH .. CH LU CH .. CH .. CH .. CH .. .. LU .. .. LU .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
@@ -1214,14 +1190,14 @@ const screen_two=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH LU CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. CA CA .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
+".. .. .. .. .. .. BX BX LU .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
@@ -1322,6 +1298,102 @@ const screen_seven=[
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. CA .. .. ..",
 "GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__entity__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__sprite__ = __webpack_require__(0);
+
+
+
+class Lucha extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
+
+  constructor(type, spritesheet, x, y){
+
+    let w = 60;
+    let h = 60;
+
+    let sprite = new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 243, 7, 39, 45);
+
+    super(type, sprite, x, y-80, w, h);
+
+    this.spriteAnimations = {
+      walkLeft: {
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 243, 7, 39, 45),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 279, 7, 38, 45)],
+        currentFrame: 0
+      },
+      walkRight: {
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 314, 7, 39, 45),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 350, 7, 40, 45)],
+        currentFrame: 0
+      }
+    };
+
+    let self = this;
+
+    this.states = {
+      // clone node -- so that if we press it multiple times before the sound is finished, it will still create a new sound
+      walking: {
+        movement: data => {
+          if (this.direction === "right") {
+            this.x += this.velX;
+          } else {
+            this.x -= this.velX;
+          }
+        },
+        animation: data => {
+          if(data.animationFrame % 200 === 0){
+            this.turn();
+          }
+          if (this.direction === "right") {
+            if (data.animationFrame % 8 === 0) {
+              this.sprite = self.spriteAnimations.walkRight.frames[self.spriteAnimations.walkRight.currentFrame];
+              self.spriteAnimations.walkRight.currentFrame++;
+
+              if (self.spriteAnimations.walkRight.currentFrame > 1) {
+                self.spriteAnimations.walkRight.currentFrame = 0;
+              }
+            }
+          } else {
+            if (data.animationFrame % 8 === 0) {
+              this.sprite = self.spriteAnimations.walkLeft.frames[self.spriteAnimations.walkLeft.currentFrame];
+              self.spriteAnimations.walkLeft.currentFrame++;
+
+              if (self.spriteAnimations.walkLeft.currentFrame > 1) {
+                self.spriteAnimations.walkLeft.currentFrame = 0;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    this.currentState = this.states.walking;
+    this.direction = "left";
+    this.velY = 0;
+    this.velX = 2;
+    this.chips = 0;
+    this.x = x;
+    this.y = y-34;
+    this.w = w;
+    this.h = h;
+  }
+
+  turn(){
+    if(this.direction === "right"){
+      this.direction === "left";
+    } else {
+      this.direction === "right";
+    }
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Lucha;
+
 
 
 /***/ })
