@@ -1,7 +1,7 @@
 # SuperNacho
 Side-scrolling Javascript game inspired by SuperMario with a Nacho-libre twist.
 
-[Play now!](supernacho.github.io)
+[Play now!](noahskang.github.io)
 
 ## Background
 
