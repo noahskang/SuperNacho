@@ -1,6 +1,8 @@
 # SuperNacho
 Side-scrolling Javascript game inspired by SuperMario with a Nacho-libre twist.
 
+[Play now!](supernacho.github.io)
+
 ## Background
 
 SuperNacho picks up nachos, destroys enemies with flaming nacho-stars, and tries to survive multiple levels. Hitting an obstacle (e.g. cactus) or an enemy luchador results in loss of life.
