@@ -13,18 +13,21 @@
         SuperNacho!!
       </div>
       <div class="Instructions">
-        Instructions: arrow keys to move. space bar to fire nachos. 
+        Instructions: arrow keys to move. space bar to fire nachos.
+      </div>
+      <div class="game-over">
+        GAME OVER!!! GAME OVER!!!
       </div>
       <button type="button" name="button">Start Game</button>
       <button id="mute-sound" type="button" name="button">Toggle Mute</button>
+  </div>
+    <div class="game-window">
+      <canvas id="bg-canvas" width="768" height="600"></canvas>
+      <!-- background will contain background -->
+      <canvas id="fg-canvas" width="768" height="600"></canvas>
+      <!-- foreground will contain all the game entities -->
     </div>
-
-    <canvas id="bg-canvas" width="768" height="600"></canvas>
-    <!-- background will contain background -->
-    <canvas id="fg-canvas" width="768" height="600"></canvas>
-    <!-- foreground will contain all the game entities -->
-
-   <script src="./assets/javascripts/jquery.min.js"></script>
+     <script src="./assets/javascripts/jquery.min.js"></script>
     <script type="text/javascript" src="./assets/javascripts/bundle.js"></script>
   </body>
 </html>

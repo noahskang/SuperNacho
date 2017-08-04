@@ -1,25 +1,34 @@
 .wrapper{
   width: 600px;
-   height: 360px;
-   position: absolute;
-   top: 5px;
-   left: 5px;
+ height: 360px;
+ margin
+ position: absolute;
+ display: flex;
+ flex-direction: column;
+ align-items: flex-start;
+ justify-content:flex-start;
+ margin-top: 10%;
 }
 
+.game-window{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 canvas{
   position: absolute;
   margin-top: 100px;
-  margin-left: 100px;
+  left: 500;
+  right: 50;
   border: 1px solid black;
   z-index: 1;
-  width: 600px;
-  height: 360px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
-
-img{
-  width: 800px;
+.game-over{
+  opacity: 0;
 }
+/*
+use jquery to trigger game play on click of start button*/
