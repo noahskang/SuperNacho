@@ -3,30 +3,40 @@
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="assets/css/stylesheet.css" type="text/css" media="screen"/>
-    <!-- <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script> -->
+    <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+  <head>
+</head>
 
     <title></title>
   </head>
   <body onload>
-    <div class="wrapper">
-      <div class="Title">
-        SuperNacho!!
+    <div class="background">
+      <div class="wrapper">
+
+
+      <div class="body">
+        <div class="directions">
+          <div class="Title">
+            <img class="animated flipInX" src="http://res.cloudinary.com/noah-s-kang/image/upload/c_scale,w_346/v1501865447/Title_kesssd.png" id="title-banner">
+            <div class="buttons">
+              <button type="button" id="start-game" name="button">Start Game</button>
+              <button id="mute-sound" type="button" name="button">Toggle Mute</button>
+            </div>
+          </div>
+          <img class="animated bounceInDown" src="http://res.cloudinary.com/noah-s-kang/image/upload/c_scale,w_370/v1501865446/Directions_ofrdly.png" id="directions">
+        </div>
+        <div class="game-window animated fadeInBig">
+          <canvas id="bg-canvas" width="768" height="600"></canvas>
+          <!-- background will contain background -->
+          <canvas id="fg-canvas" width="768" height="600"></canvas>
+          <!-- foreground will contain all the game entities -->
+        </div>
+        <div class
       </div>
-      <div class="Instructions">
-        Instructions: arrow keys to move. space bar to fire nachos.
-      </div>
-      <div class="game-over">
-        GAME OVER!!! GAME OVER!!!
-      </div>
-      <button type="button" name="button">Start Game</button>
-      <button id="mute-sound" type="button" name="button">Toggle Mute</button>
+            </div>
   </div>
-    <div class="game-window">
-      <canvas id="bg-canvas" width="768" height="600"></canvas>
-      <!-- background will contain background -->
-      <canvas id="fg-canvas" width="768" height="600"></canvas>
-      <!-- foreground will contain all the game entities -->
-    </div>
+
      <script src="./assets/javascripts/jquery.min.js"></script>
     <script type="text/javascript" src="./assets/javascripts/bundle.js"></script>
   </body>

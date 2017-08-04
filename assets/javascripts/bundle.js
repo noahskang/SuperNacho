@@ -169,27 +169,29 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
 
   constructor(type, spritesheet, x, y, w, h){
 
-    let sprite = new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24);
+    let sprite = new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 617, 42, 70);
 
     super(type, sprite, x, y, w, h);
 
     this.spriteAnimations = {
       walkRight: {
-        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 24, 0, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 48, 0, 24, 24),
-                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 0, 24, 24)],
+        frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 114, 617, 55, 70),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 168, 617, 50, 70),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 222, 617, 60, 70),
+                new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 282, 617, 48, 70)],
         currentFrame: 0
       },
       walkLeft: {
-          frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 51, 26, 24, 24),
-                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 26, 25, 24, 24),
-                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 26, 24, 24)],
+          frames: [new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 116, 686, 52, 70),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 168, 686, 54, 70),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 222, 686, 60, 70),
+                  new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 282, 686, 48, 70)],
           currentFrame: 0
       },
-      standRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 0, 0, 24, 24),
-      standLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 76, 27, 24, 24),
-      jumpLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 99, 25, 24, 24),
-      jumpRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 98, 0, 28, 24)
+      standRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 617, 42, 70),
+      standLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 378, 686, 42, 70),
+      jumpLeft: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 72, 688, 42, 70),
+      jumpRight: new __WEBPACK_IMPORTED_MODULE_1__sprite__["a" /* default */](spritesheet, 378, 617, 48, 70)
     };
     let self = this;
     this.states = {
@@ -239,7 +241,7 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
               this.sprite = self.spriteAnimations.walkRight.frames[self.spriteAnimations.walkRight.currentFrame];
               self.spriteAnimations.walkRight.currentFrame++;
 
-              if (self.spriteAnimations.walkRight.currentFrame > 2) {
+              if (self.spriteAnimations.walkRight.currentFrame > 3) {
                 self.spriteAnimations.walkRight.currentFrame = 0;
               }
             }
@@ -248,7 +250,7 @@ class Nacho extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */] {
               this.sprite = self.spriteAnimations.walkLeft.frames[self.spriteAnimations.walkLeft.currentFrame];
               self.spriteAnimations.walkLeft.currentFrame++;
 
-              if (self.spriteAnimations.walkLeft.currentFrame > 2) {
+              if (self.spriteAnimations.walkLeft.currentFrame > 3) {
                 self.spriteAnimations.walkLeft.currentFrame = 0;
               }
             }
@@ -432,7 +434,9 @@ class Game {
         __WEBPACK_IMPORTED_MODULE_0__util_input__["a" /* default */].init(data);
         __WEBPACK_IMPORTED_MODULE_5__entities_entities__["a" /* default */].init(data);
         __WEBPACK_IMPORTED_MODULE_1__util_render__["a" /* default */].init(data);
-        // this.run(data);
+        document.getElementById('start-game').addEventListener('click', (e) => {
+          this.run(data);
+        });
       });
     });
     this.id;
@@ -488,7 +492,7 @@ class Game {
     if(nachox >= midpt+50){
       data.viewport.vX += 4;
     }
-    data.viewport.vX +=1;
+    // data.viewport.vX +=1;
 
   }
 
@@ -1036,7 +1040,7 @@ const Entities = {
 
     let background = new __WEBPACK_IMPORTED_MODULE_3__background__["a" /* default */]("bg", data.tileSet, 0, 0, 768, 600);
 
-    let nacho = new __WEBPACK_IMPORTED_MODULE_1__nacho__["a" /* default */]("nacho", data.spriteSheet, 40, 10, 64, 64);
+    let nacho = new __WEBPACK_IMPORTED_MODULE_1__nacho__["a" /* default */]("nacho", data.tileSet, 40, 10, 64, 64);
 
     let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(220, 70);
     let starCounter = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(340, 70);

@@ -1,34 +1,74 @@
 .wrapper{
-  width: 600px;
- height: 360px;
- margin
- position: absolute;
+ /*position: relative;*/
  display: flex;
  flex-direction: column;
- align-items: flex-start;
+ align-items: center;
  justify-content:flex-start;
- margin-top: 10%;
+}
+
+.background{
+  background-image: url("http://res.cloudinary.com/noah-s-kang/image/upload/v1501866773/background_w6komw.png");
+  background-attachment: fixed;
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size: cover;
+   height: 100vh;
+   margin: 0 0 0 0;
+}
+
+button{
+  margin-top: 10px;
+}
+
+.Title{
+  margin-top: 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1%;
+}
+
+.body{
+  position: relative;
+  /*display: flex;*/
+  /*flex-direction: row;*/
+  margin-left: -330px;
+  /*justify-content: flex-start;
+  align-items: flex-start;*/
+}
+
+.directions{
+  float: left;
+  margin-right: 20px;
 }
 
 .game-window{
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin-top: 20px;
+  margin-left: 50px;
+  margin-right: 20px;
+  width: 768px;
+  height: 600px;
 }
+
 canvas{
   position: absolute;
-  margin-top: 100px;
-  left: 500;
-  right: 50;
-  border: 1px solid black;
   z-index: 1;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
+#fg-canvas{
+  z-index: 10;
+}
+
 .game-over{
   opacity: 0;
+}
+
+.wrapper{
+
 }
 /*
 use jquery to trigger game play on click of start button*/
