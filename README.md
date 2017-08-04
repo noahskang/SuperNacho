@@ -73,6 +73,18 @@ this.level.forEach((screen, i) => {
           this.createRightCorner(xPos, yPos);
           break;
 ```
+```Javascript
+export class Ground extends Entity{
+  constructor(type, spritesheet, x, y){
+    let w = 24;
+    let h = 35;
+    let sprite =  new Sprite(spritesheet, 216, 72, 72, 72);
+
+    super(type, sprite, x, y, w, h);
+
+  }
+}
+```
 
 ## Bonus Features
 - [ ] Add advanced styling - I used a temple runner sprite, but I eventually want to update this with original artwork.
