@@ -408,7 +408,7 @@ class Game {
     // keeps track of whether or not nacho has died.
     let fatality = false;
 
-    let ninjasound =
+    // let ninjasound =
     // add a listener to wait until spritesheet is loaded.
     spriteSheet.addEventListener("load", ()=>{
       // once it's loaded, then we can run the spritesheet.
@@ -463,7 +463,7 @@ class Game {
         window.cancelAnimationFrame(this.id);
         let ctx = data.canvas.fgCtx;
         ctx.fillText("YOU LOST!!!", 300, 300);
-        setTimeout(this.reload, 3000);
+        setTimeout(this.reload, 2000);
       }else if(this.gameWon(data)){
         window.cancelAnimationFrame(this.id);
         let ctx = data.canvas.fgCtx;
@@ -699,7 +699,9 @@ const Render = {
     Render.helpers.drawEntity(data.entities.nacho, data);
 
     data.entities.chipsArray.forEach((chip)=>{
-      Render.helpers.drawEntity(chip, data);
+      if(((chip.x + chip.w >= data.viewport.vX && chip.x <= data.viewport.vX + data.viewport.width)) && ((chip.y + chip.h >= data.viewport.vY && chip.y + chip.h <= data.viewport.vY + data.viewport.height))){
+        Render.helpers.drawEntity(chip, data);
+      }
     });
 
     data.entities.ninjastars.forEach((star)=>{
@@ -995,8 +997,11 @@ const nacho = data => {
 
 const chips = data => {
   data.entities.chipsArray.forEach((chip)=>{
-    chip.currentState.animation(data);
+    if(((chip.x + chip.w >= data.viewport.vX && chip.x <= data.viewport.vX + data.viewport.width)) && ((chip.y + chip.h >= data.viewport.vY && chip.y + chip.h <= data.viewport.vY + data.viewport.height))){
+      chip.currentState.animation(data);
+    }
   });
+
 };
 
 const luchas = data => {
@@ -1044,7 +1049,6 @@ const Entities = {
 
     let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(220, 70);
     let starCounter = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(340, 70);
-
 
     let ninjastars = [];
 
@@ -1532,24 +1536,24 @@ const One = () => {
 
 
 const screen_one=[
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. SI .. .. .. CH .. .. CH .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. SI .. .. .. CH .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
 const screen_two=[
-".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH .. CH .. CH .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. CH .. CH .. CH LU CH LU CH .. CH .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. CH .. CH .. CH LU CH LU CH .. CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. BX BX .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX LU .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
@@ -1557,7 +1561,7 @@ const screen_two=[
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
 const screen_three=[
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH CH CH CH CH CH .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
@@ -1600,11 +1604,11 @@ const screen_five=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. BX BX BX BX LU .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX BX .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. LU CH CH CH CH .. .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. LU CH CH CH .. .. .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. BX BX BX BX BX BX BX .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 "UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .."];
@@ -1619,14 +1623,14 @@ const screen_six=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. LU .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. LU .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
+".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. CH .. BX .. .. .. .. BX .. CH .. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
@@ -1638,12 +1642,12 @@ const screen_six=[
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
 const screen_seven=[
-".. .. .. .. .. .. .. .. CH CH .. .. .. CA CA .. .. .. CH CH .. LU .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. CH CH .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. LU .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
