@@ -321,8 +321,8 @@ class Background extends __WEBPACK_IMPORTED_MODULE_0__entity__["a" /* default */
 "use strict";
 const Score = (x, y) => ({
   value: 0,
-  size: "25px",
-  font: "PixelEmulator",
+  size: "20px",
+  font: "Montserrat",
   color: "red",
   x,
   y
@@ -691,8 +691,8 @@ const Render = {
 
     data.mapCreator.renderMap(data);
 
-    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx, "score");
-    Render.helpers.drawText(data.entities.starCounter, data.canvas.fgCtx, "chips");
+    Render.helpers.drawText(data.entities.score, data.canvas.fgCtx, "Score: ");
+    Render.helpers.drawText(data.entities.starCounter, data.canvas.fgCtx, "NachoStars: ");
 
     // only draw elements that are in the viewport:
 
@@ -1047,8 +1047,8 @@ const Entities = {
 
     let nacho = new __WEBPACK_IMPORTED_MODULE_1__nacho__["a" /* default */]("nacho", data.tileSet, 40, 10, 64, 64);
 
-    let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(220, 70);
-    let starCounter = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(340, 70);
+    let score = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(55, 60);
+    let starCounter = Object(__WEBPACK_IMPORTED_MODULE_4__score__["a" /* default */])(200, 60);
 
     let ninjastars = [];
 
@@ -1556,7 +1556,7 @@ const screen_two=[
 ".. .. .. .. .. .. BX BX .. .. .. GR GR GR GR GR GR GR GR GR GR GR .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX BX .. .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. BX BX LU .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. CA .. .. .. ..",
+".. .. .. .. .. .. BX BX LU .. .. UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR GR GR GR GR GR GR GR UG UG UG UG UG UG UG UG UG UG UG GR GR GR GR GR GR GR GR GR GR",
 "UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG"];
 
@@ -1589,7 +1589,7 @@ const screen_four=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. FL FM FM FM FM FR FM .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CA .. .. .. ..",
+".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. FL FM FM FM FM FM FR ..",
 ".. .. .. .. LU .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 "GR GR GR GR RG .. .. .. .. .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR GR",
@@ -1632,7 +1632,7 @@ const screen_six=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. CH .. .. .. .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. BX BX BX BX .. .. .. .. .. .. .. .. .. .. .. .. CH CH .. .. .. .. .. ..",
-".. .. .. .. .. CH .. BX .. .. .. .. BX .. CH .. .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. ..",
+".. .. .. .. .. CH .. BX .. .. .. .. BX .. CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. BX .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
 ".. .. .. .. .. BX .. .. .. .. .. .. .. .. BX .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. BX BX .. .. .. .. .. ..",
@@ -1646,7 +1646,7 @@ const screen_seven=[
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. CH CH .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
-".. .. BX BX .. .. .. .. .. .. .. .. .. CA CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+".. .. BX BX .. .. .. .. .. .. .. .. .. CA .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
 ".. .. BX BX .. .. .. LG GR GR GR GR GR GR GR GR GR GR GR GR GR RG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",
 ".. .. .. .. .. .. .. UG UG UG UG UG UG UG UG UG UG UG UG UG UG UG .. .. .. .. .. .. .. .. .. ..",

@@ -18,6 +18,13 @@
 
 button{
   margin-top: 10px;
+  width: 140px;
+  height: 50px;
+  color: white;
+  background-color: rgb(208, 117, 23);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
 }
 
 .Title{
