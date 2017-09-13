@@ -89,8 +89,8 @@ canvas{
   display: flex;
   justify-content: center
 }
-
-.icon.alt:before {
+/*
+.icon {
   -moz-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   -webkit-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   -ms-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
@@ -105,28 +105,28 @@ canvas{
   text-align: center;
   width: 2.25em;
   margin: 30px 10px 0 10px;
-}
+}*/
 
-.fa-linkedin:before {
+.fa-linkedin {
   background-color: #8cd4e9;
 }
 
-.fa-linkedin:hover:before {
+.fa-linkedin:hover {
   background-color: #77cce5;
 }
 
-.fa-linkedin:active:before {
+.fa-linkedin:active {
   background-color: #4cbcdd;
 }
 
-.fa-github:before {
+.fa-github {
   background-color: #e98ca4;
 }
 
-.fa-github:hover:before {
+.fa-github:hover {
   background-color: #e57793;
 }
 
-.fa-github:active:before {
+.fa-github:active {
   background-color: #dd4c71;
 }
