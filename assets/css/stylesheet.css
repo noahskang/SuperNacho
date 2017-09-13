@@ -11,7 +11,7 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 100vh;
+  height: 130vh;
   margin: 0 0 0 0;
 }
 
@@ -74,15 +74,15 @@ canvas{
 }
 
 .footer{
-  height: 100px;
-  padding: 50px 50px 50px 50px;
+  height: 50px;
+  padding: 30px 0px 0px 0px;
   color: black;
-  font-size: 12px;
+  font-size: 25px;
   text-align: center;
 }
 
 .footer h1{
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .icons{
@@ -95,39 +95,39 @@ canvas{
   -webkit-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   -ms-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-  background-color: #47586a;
+  border: 0;
   border-radius: 100%;
   width: 50px;
   color: #ffffff;
   display: inline-block;
-  font-size: 1.5rem;
-  height: 2.25em;
-  line-height: 2.25em;
+  height: 2.5em;
+  line-height: 2.5em;
   text-align: center;
-  width: 2.25em;
-  margin: 30px 10px 0 10px;
+  width: 2.5em;
+  margin: 10px 50px 0 50px;
+  cursor: pointer;
 }
 
 .fa-linkedin {
-  background-color: #8cd4e9;
+  background-color: #e7814e;
 }
 
 .fa-linkedin:hover {
-  background-color: #77cce5;
+  background-color: #eca37e;
 }
 
 .fa-linkedin:active {
-  background-color: #4cbcdd;
+  background-color: #b5582a;
 }
 
 .fa-github {
-  background-color: #e98ca4;
+  background-color: #e6693b;
 }
 
 .fa-github:hover {
-  background-color: #e57793;
+  background-color: #ed9371;
 }
 
 .fa-github:active {
-  background-color: #dd4c71;
+  background-color: #c64a1d;
 }
